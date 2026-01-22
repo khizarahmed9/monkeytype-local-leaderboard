@@ -12,6 +12,7 @@ import * as QuoteReportModal from "../modals/quote-report";
 import * as QuoteSearchModal from "../modals/quote-search";
 import * as CustomTextModal from "../modals/custom-text";
 import * as PractiseWordsModal from "../modals/practise-words";
+import { focusWords } from "../test/test-ui";
 import { navigate } from "../controllers/route-controller";
 import { getMode2 } from "../utils/misc";
 import * as ShareTestSettingsPopup from "../modals/share-test-settings";
@@ -116,4 +117,10 @@ qs(".pageTest #dailyLeaderboardRank")?.on("click", async () => {
       null,
     )}&goToUserPage=true`,
   );
+});
+
+testPage?.onChild("keydown", "#localLeaderboardName", (event) => {
+  if (event.key === "Enter") {
+    focusWords();
+  }
 });

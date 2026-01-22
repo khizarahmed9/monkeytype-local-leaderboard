@@ -20,10 +20,13 @@ document.addEventListener("keydown", (e) => {
   const pageTestActive: boolean = getActivePage() === "test";
   if (pageTestActive && !TestState.resultVisible && !isInputElementFocused()) {
     const popupVisible: boolean = Misc.isAnyPopupVisible();
+    const localLeaderboardInputFocused =
+      document.activeElement?.id === "localLeaderboardName";
     // this is nested because isAnyPopupVisible is a bit expensive
     // and we don't want to call it during the test
     if (
       !popupVisible &&
+      !localLeaderboardInputFocused &&
       !["Enter", " ", "Escape", "Tab", ...ModifierKeys].includes(e.key) &&
       !e.metaKey &&
       !e.ctrlKey
