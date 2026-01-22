@@ -16,7 +16,6 @@ export type PageName =
   | "profileSearch"
   | "404"
   | "accountSettings"
-  | "leaderboards"
   | "localLeaderboards"
   | "friends";
 
