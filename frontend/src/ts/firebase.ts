@@ -52,20 +52,21 @@ const { promise: authPromise, resolve: resolveAuthPromise } =
 
 export async function init(callback: ReadyCallback): Promise<void> {
   try {
-    let firebaseConfig: FirebaseOptions | null;
+    let firebaseConfig: FirebaseOptions | null | undefined;
 
     const constants = import.meta.glob("./constants/firebase-config.ts");
     const loader = constants["./constants/firebase-config.ts"];
     if (loader) {
-      firebaseConfig = ((await loader()) as { firebaseConfig: FirebaseOptions })
-        .firebaseConfig;
+      firebaseConfig = (
+        (await loader()) as { firebaseConfig?: FirebaseOptions }
+      ).firebaseConfig;
     } else {
       throw new Error(
         "No config file found. Make sure frontend/src/ts/constants/firebase-config.ts exists",
       );
     }
 
-    if (firebaseConfig === null || firebaseConfig.apiKey === "") {
+    if (!firebaseConfig || firebaseConfig.apiKey === "") {
       await callback(false, null);
       if (isDevEnvironment()) {
         addBanner({
