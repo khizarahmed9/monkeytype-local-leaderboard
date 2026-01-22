@@ -14,7 +14,6 @@ import * as CustomTextModal from "../modals/custom-text";
 import * as PractiseWordsModal from "../modals/practise-words";
 import { focusWords } from "../test/test-ui";
 import { navigate } from "../controllers/route-controller";
-import { getMode2 } from "../utils/misc";
 import * as ShareTestSettingsPopup from "../modals/share-test-settings";
 import { ConfigKey } from "@monkeytype/schemas/configs";
 import { ListsObjectKeys } from "../commandline/lists";
@@ -111,12 +110,7 @@ testPage?.onChild("click", "#practiseWordsButton", () => {
 });
 
 qs(".pageTest #dailyLeaderboardRank")?.on("click", async () => {
-  void navigate(
-    `/leaderboards?type=daily&language=${Config.language}&mode2=${getMode2(
-      Config,
-      null,
-    )}&goToUserPage=true`,
-  );
+  void navigate(`/local-leaderboards`);
 });
 
 testPage?.onChild("keydown", "#localLeaderboardName", (event) => {
