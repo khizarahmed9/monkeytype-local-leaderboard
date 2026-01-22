@@ -60,6 +60,7 @@ export default defineConfig(({ mode }): UserConfig => {
     },
     clearScreen: false,
     root: "src",
+    base: env["VITE_BASE_URL"] ?? "/",
     publicDir: "../static",
     optimizeDeps: {
       exclude: ["@fortawesome/fontawesome-free"],
