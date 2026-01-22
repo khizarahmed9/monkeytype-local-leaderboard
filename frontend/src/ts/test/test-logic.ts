@@ -1159,6 +1159,7 @@ export async function finish(difficultyFailed = false): Promise<void> {
           wpm: completedEvent.wpm,
           acc: completedEvent.acc,
           timestamp: Date.now(),
+          testType: `${completedEvent.mode} ${completedEvent.mode2}`,
         },
       });
     } catch (e) {

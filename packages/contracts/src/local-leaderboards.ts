@@ -1,22 +1,22 @@
 import { z } from "zod";
 import { initContract } from "@ts-rest/core";
-import {
-  CommonResponses,
-  meta,
-  responseWithData,
-} from "./util/api";
+import { CommonResponses, meta, responseWithData } from "./util/api";
 
 export const LocalLeaderboardEntrySchema = z.object({
   name: z.string(),
   wpm: z.number(),
   acc: z.number(),
   timestamp: z.number(),
+  testType: z.string(),
 });
 export type LocalLeaderboardEntry = z.infer<typeof LocalLeaderboardEntrySchema>;
 
 export const GetLocalLeaderboardResponseSchema = responseWithData(
-  z.array(LocalLeaderboardEntrySchema)
+  z.array(LocalLeaderboardEntrySchema),
 );
+export type GetLocalLeaderboardResponse = z.infer<
+  typeof GetLocalLeaderboardResponseSchema
+>;
 
 export const PostLocalLeaderboardBodySchema = LocalLeaderboardEntrySchema;
 
@@ -50,8 +50,8 @@ export const localLeaderboardsContract = c.router(
     pathPrefix: "/local-leaderboards",
     strictStatusCodes: true,
     metadata: meta({
-      openApiTags: "local-leaderboards",
+      openApiTags: "leaderboards",
     }),
     commonResponses: CommonResponses,
-  }
+  },
 );

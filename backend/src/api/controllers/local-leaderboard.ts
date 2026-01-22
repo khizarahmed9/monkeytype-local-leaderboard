@@ -20,13 +20,25 @@ export async function getLocalLeaderboard(
     const lines = content.trim().split("\n");
     const entries: LocalLeaderboardEntry[] = lines
       .map((line) => {
-        const [name, wpm, acc, timestamp] = line.split(",");
-        if (!name || !wpm || !acc || !timestamp) return null;
+        const [name, wpm, acc, timestamp, testType] = line.split(",");
+        if (
+          name === undefined ||
+          wpm === undefined ||
+          acc === undefined ||
+          timestamp === undefined ||
+          name === "" ||
+          wpm === "" ||
+          acc === "" ||
+          timestamp === ""
+        ) {
+          return null;
+        }
         return {
           name,
           wpm: parseFloat(wpm),
           acc: parseFloat(acc),
           timestamp: parseInt(timestamp),
+          testType: testType ?? "unknown",
         };
       })
       .filter((e): e is LocalLeaderboardEntry => e !== null)
@@ -43,7 +55,7 @@ export async function addLocalLeaderboardEntry(
   req: MonkeyRequest<undefined, LocalLeaderboardEntry>,
 ): Promise<MonkeyResponse<{ message: string }>> {
   const entry = req.body;
-  const line = `${entry.name},${entry.wpm},${entry.acc},${entry.timestamp}\n`;
+  const line = `${entry.name},${entry.wpm},${entry.acc},${entry.timestamp},${entry.testType}\n`;
   await fs.promises.appendFile(CSV_FILE, line);
   return new MonkeyResponse("Result saved", { message: "Result saved" });
 }
