@@ -84,7 +84,7 @@ function getPlugins({
     oxlintChecker({
       debounceDelay: 125,
       typeAware: true,
-      overlay: isDevelopment,
+      overlay: false,
     }),
     injectHTML(),
     tailwindcss(),
@@ -246,8 +246,7 @@ function getBuildOptions({
           ) {
             return `webfonts/[name]-[hash].${extType}`;
           }
-          // oxlint-disable-next-line no-deprecated
-          if (assetInfo.name === "misc.css") {
+          if (assetInfo.names[0] === "misc.css") {
             return `${extType}/vendor.[hash][extname]`;
           }
 
