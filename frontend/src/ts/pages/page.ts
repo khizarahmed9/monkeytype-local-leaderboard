@@ -17,6 +17,7 @@ export type PageName =
   | "404"
   | "accountSettings"
   | "leaderboards"
+  | "localLeaderboards"
   | "friends";
 
 type Options<T> = {

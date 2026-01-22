@@ -13,6 +13,8 @@ import { usersContract } from "./users";
 import { quotesContract } from "./quotes";
 import { webhooksContract } from "./webhooks";
 import { connectionsContract } from "./connections";
+import { localLeaderboardsContract } from "./local-leaderboards";
+export * from "./local-leaderboards";
 
 const c = initContract();
 
@@ -31,6 +33,7 @@ export const contract = c.router({
   quotes: quotesContract,
   webhooks: webhooksContract,
   connections: connectionsContract,
+  localLeaderboards: localLeaderboardsContract,
 });
 
 /**

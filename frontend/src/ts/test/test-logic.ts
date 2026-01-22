@@ -91,6 +91,16 @@ export function startTest(now: number): boolean {
     return false;
   }
 
+  const nameInput = document.getElementById(
+    "localLeaderboardName",
+  ) as HTMLInputElement;
+  if (nameInput && !nameInput.value.trim()) {
+    Notifications.add("Please enter your name for the local leaderboard", 0, {
+      important: true,
+    });
+    return false;
+  }
+
   if (isAuthenticated()) {
     void AnalyticsController.log("testStarted");
   } else {
@@ -1229,6 +1239,25 @@ async function saveResult(
   result.hash = objectHash(result);
 
   console.trace();
+
+  const nameInput = document.getElementById(
+    "localLeaderboardName",
+  ) as HTMLInputElement;
+  if (nameInput && nameInput.value.trim()) {
+    try {
+      // @ts-expect-error Ape client might not be fully typed yet in this context
+      await Ape.localLeaderboards.add({
+        body: {
+          name: nameInput.value.trim(),
+          wpm: result.wpm,
+          acc: result.acc,
+          timestamp: Date.now(),
+        },
+      });
+    } catch (e) {
+      console.error("Failed to save local leaderboard entry", e);
+    }
+  }
 
   const response = await Ape.results.add({ body: { result } });
 

@@ -15,6 +15,7 @@ import configs from "./configs";
 import configuration from "./configuration";
 import { version } from "../../version";
 import leaderboards from "./leaderboards";
+import localLeaderboards from "./local-leaderboards";
 import connections from "./connections";
 import addSwaggerMiddlewares from "./swagger";
 import { MonkeyResponse } from "../../utils/monkey-response";
@@ -54,6 +55,7 @@ const router = s.router(contract, {
   psas,
   public: publicStats,
   leaderboards,
+  localLeaderboards,
   results,
   configuration,
   dev,
