@@ -93,8 +93,8 @@ export function startTest(now: number): boolean {
 
   const nameInput = document.getElementById(
     "localLeaderboardName",
-  ) as HTMLInputElement;
-  if (nameInput && !nameInput.value.trim()) {
+  ) as HTMLInputElement | null;
+  if (nameInput !== null && !nameInput.value.trim()) {
     Notifications.add("Please enter your name for the local leaderboard", 0, {
       important: true,
     });
@@ -557,7 +557,7 @@ async function init(): Promise<boolean> {
       Arrays.nthElementFromArray(
         // ignoring for now but this might need a different approach
         // oxlint-disable-next-line no-misused-spread
-        [...TestWords.words.getCurrent()],
+        Array.from(TestWords.words.getCurrent()),
         0,
       ) as string,
     );
@@ -1148,6 +1148,24 @@ export async function finish(difficultyFailed = false): Promise<void> {
   );
   Result.updateTodayTracker();
 
+  const nameInput = document.getElementById(
+    "localLeaderboardName",
+  ) as HTMLInputElement | null;
+  if (nameInput !== null && nameInput.value.trim() !== "" && !dontSave) {
+    try {
+      void Ape.localLeaderboards.add({
+        body: {
+          name: nameInput.value.trim(),
+          wpm: completedEvent.wpm,
+          acc: completedEvent.acc,
+          timestamp: Date.now(),
+        },
+      });
+    } catch (e) {
+      console.error("Failed to save local leaderboard entry", e);
+    }
+  }
+
   let savingResultPromise: ReturnType<typeof saveResult> =
     Promise.resolve(null);
   const user = getAuthenticatedUser();
@@ -1239,25 +1257,6 @@ async function saveResult(
   result.hash = objectHash(result);
 
   console.trace();
-
-  const nameInput = document.getElementById(
-    "localLeaderboardName",
-  ) as HTMLInputElement;
-  if (nameInput && nameInput.value.trim()) {
-    try {
-      // @ts-expect-error Ape client might not be fully typed yet in this context
-      await Ape.localLeaderboards.add({
-        body: {
-          name: nameInput.value.trim(),
-          wpm: result.wpm,
-          acc: result.acc,
-          timestamp: Date.now(),
-        },
-      });
-    } catch (e) {
-      console.error("Failed to save local leaderboard entry", e);
-    }
-  }
 
   const response = await Ape.results.add({ body: { result } });
 
@@ -1590,7 +1589,7 @@ ConfigEvent.subscribe(({ key, newValue, nosave }) => {
           Arrays.nthElementFromArray(
             // ignoring for now but this might need a different approach
             // oxlint-disable-next-line no-misused-spread
-            [...TestWords.words.getCurrent()],
+            Array.from(TestWords.words.getCurrent()),
             0,
           ) as string,
         );
