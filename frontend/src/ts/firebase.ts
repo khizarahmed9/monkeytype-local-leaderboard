@@ -65,6 +65,18 @@ export async function init(callback: ReadyCallback): Promise<void> {
       );
     }
 
+    if (firebaseConfig === null || firebaseConfig.apiKey === "") {
+      await callback(false, null);
+      if (isDevEnvironment()) {
+        addBanner({
+          level: "notice",
+          text: "Dev Info: Firebase skipped (no config)",
+          icon: "fas fa-info-circle",
+        });
+      }
+      return;
+    }
+
     readyCallback = callback;
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     Auth = getAuth(app);
