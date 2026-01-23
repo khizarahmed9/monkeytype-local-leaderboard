@@ -44,8 +44,8 @@ jobs:
       - name: Build
         run: pnpm run build-fe
         env:
-          # Set this to /<repo-name>/ if deploying to a project page
-          VITE_BASE_URL: /${{ github.event.repository.name }}/
+          # Set to / for custom domains, or /repo-name/ for default github.io paths
+          VITE_BASE_URL: /
           # Required env vars for build (even if mock)
           RECAPTCHA_SITE_KEY: "mock_key"
           SENTRY_AUTH_TOKEN: "mock_token"
