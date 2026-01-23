@@ -186,6 +186,11 @@ export async function navigate(
     return;
   }
 
+  const base = import.meta.env.BASE_URL;
+  if (url.startsWith("/") && base !== "/" && !url.startsWith(base)) {
+    url = base + url.slice(1);
+  }
+
   url = url.replace(/\/$/, "");
   if (url === "") url = "/";
 
@@ -206,10 +211,17 @@ export async function navigate(
 async function router(
   options = {} as NavigationEvent.NavigateOptions,
 ): Promise<void> {
+  const base = import.meta.env.BASE_URL;
+  let path = location.pathname;
+  if (base !== "/" && path.startsWith(base)) {
+    path = path.replace(base, "/");
+  }
+  if (!path.startsWith("/")) path = "/" + path;
+
   const matches = routes.map((r) => {
     return {
       route: r,
-      result: location.pathname.match(pathToRegex(r.path)),
+      result: path.match(pathToRegex(r.path)),
     };
   });
 
