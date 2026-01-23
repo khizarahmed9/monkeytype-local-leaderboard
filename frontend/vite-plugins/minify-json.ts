@@ -6,11 +6,11 @@ import path from "node:path";
  * Minifies all json files in the `dist` directory
  * @returns
  */
-export function minifyJson(): Plugin {
+export function minifyJson(outDir: string = "dist"): Plugin {
   return {
     name: "minify-json",
     apply: "build",
-    generateBundle() {
+    writeBundle() {
       let totalOriginalSize = 0;
       let totalMinifiedSize = 0;
 
@@ -49,7 +49,11 @@ export function minifyJson(): Plugin {
       // console.log("\n\x1b[1mMinifying JSON files...\x1b[0m\n");
       const start = performance.now();
 
-      minifyJsonFiles("./dist");
+      try {
+        minifyJsonFiles(outDir);
+      } catch (e) {
+        console.warn("Failed to minify json files", e);
+      }
 
       const end = performance.now();
       const totalSavings =

@@ -202,7 +202,7 @@ function getPlugins({
       ],
       injectTo: "head-prepend",
     }),
-    minifyJson(),
+    minifyJson("dist"),
   ];
 
   return [...plugins, ...(isDevelopment ? devPlugins : prodPlugins)].filter(
