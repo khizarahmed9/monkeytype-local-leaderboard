@@ -218,7 +218,7 @@ function getBuildOptions({
   return {
     sourcemap: enableSourceMaps,
     emptyOutDir: true,
-    outDir: "../dist",
+    outDir: "dist",
     assetsInlineLimit: 0, //dont inline small files as data
     rollupOptions: {
       input: {
