@@ -104,7 +104,7 @@ export async function getLanguage(lang: Language): Promise<LanguageObject> {
       `/languages/${lang}.json`,
     );
 
-    if (!isDevEnvironment()) {
+    if (!isDevEnvironment() && cryptoSubtle !== undefined) {
       //check the content to make it less easy to manipulate
       const encoder = new TextEncoder();
       const data = encoder.encode(JSON.stringify(loaded, null, 0));
