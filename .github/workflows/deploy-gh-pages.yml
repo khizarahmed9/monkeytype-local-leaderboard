@@ -50,6 +50,9 @@ jobs:
           RECAPTCHA_SITE_KEY: "mock_key"
           SENTRY_AUTH_TOKEN: "mock_token"
 
+      - name: Create .nojekyll
+        run: touch frontend/dist/.nojekyll
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
