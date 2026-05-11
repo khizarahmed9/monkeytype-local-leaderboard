@@ -1,10 +1,7 @@
 import * as Misc from "./utils/misc";
 import * as MonkeyPower from "./elements/monkey-power";
-import * as MerchBanner from "./elements/merch-banner";
 import * as ConnectionState from "./states/connection";
 import * as AccountButton from "./elements/account-button";
-//@ts-expect-error no types for this package
-import Konami from "konami";
 import * as ServerConfiguration from "./ape/server-configuration";
 import { getActiveFunboxesWithFunction } from "./test/funbox/list";
 import { configLoadPromise } from "./config";
@@ -21,7 +18,6 @@ onDOMReady(async () => {
   qs("body")?.setStyle({
     transition: "background .25s, transform .05s",
   });
-  MerchBanner.showIfNotClosedBefore();
 
   for (const fb of getActiveFunboxesWithFunction("applyGlobalCSS")) {
     fb.functions.applyGlobalCSS();
@@ -42,26 +38,25 @@ onDOMReady(async () => {
         qs(".disabledNotification")?.removeClass("hidden");
       }
       if (!ServerConfiguration.get()?.connections.enabled) {
+        // oxlint-disable-next-line no-unsafe-call
         qs(".accountButtonAndMenu .goToFriends")?.addClass("hidden");
       }
     });
   }
   MonkeyPower.init();
 
-  // untyped, need to ignore
-  // oxlint-disable-next-line no-unsafe-call
-  new Konami("https://keymash.io/");
-
   if (Misc.isDevEnvironment()) {
-    void navigator.serviceWorker
-      .getRegistrations()
-      .then(function (registrations) {
-        for (const registration of registrations) {
-          void registration.unregister();
-        }
-      });
+    if ("serviceWorker" in navigator && navigator.serviceWorker !== undefined) {
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then(function (registrations) {
+          for (const registration of registrations) {
+            void registration.unregister();
+          }
+        });
+    }
   } else {
-    if ("serviceWorker" in navigator) {
+    if ("serviceWorker" in navigator && navigator.serviceWorker !== undefined) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("/sw.js", { scope: "/" })

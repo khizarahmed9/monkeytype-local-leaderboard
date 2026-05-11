@@ -1,17 +1,6 @@
 <div class="page pageTest full-width content-grid hidden" data-nosnippet>
   <div id="testConfig" class="full-width">
     <div class="row">
-      <div class="puncAndNum">
-        <button class="textButton punctuationMode">
-          <i class="fas fa-fw fa-at"></i>
-          punctuation
-        </button>
-        <button class="textButton numbersMode">
-          <i class="fas fa-fw fa-hashtag"></i>
-          numbers
-        </button>
-      </div>
-
       <div class="spacer leftSpacer"></div>
 
       <div class="mode">
@@ -19,34 +8,12 @@
           <i class="fas fa-fw fa-clock"></i>
           time
         </button>
-        <button class="textButton" mode="words">
-          <i class="fas fa-fw fa-font"></i>
-          words
-        </button>
-        <button class="textButton" mode="quote">
-          <i class="fas fa-fw fa-quote-left"></i>
-          quote
-        </button>
-        <button class="textButton" mode="zen">
-          <i class="fas fa-fw fa-mountain"></i>
-          zen
-        </button>
-        <button class="textButton" mode="custom">
-          <i class="fas fa-fw fa-wrench"></i>
-          custom
-        </button>
       </div>
 
       <div class="spacer rightSpacer"></div>
 
       <div class="time">
         <button class="textButton" timeConfig="15"><span>15</span></button>
-        <button class="textButton" timeConfig="30"><span>30</span></button>
-        <button class="textButton" timeConfig="60"><span>60</span></button>
-        <button class="textButton" timeConfig="120"><span>120</span></button>
-        <button class="textButton" timeConfig="custom">
-          <i class="fas fa-fw fa-tools"></i>
-        </button>
       </div>
 
       <div class="wordCount">
@@ -116,8 +83,26 @@
       </button>
     </div>
   </div>
-  <div id="localLeaderboardInput" class="content-grid full-width" style="margin-bottom: 1rem; justify-content: center; display: grid;">
-    <input type="text" id="localLeaderboardName" placeholder="Enter name for local leaderboard" style="background: var(--bg-color); color: var(--main-color); border: 2px solid var(--sub-color); padding: 0.5rem; border-radius: 0.5rem; font-family: var(--font-family); font-size: 1.2rem; text-align: center;">
+  <div
+    id="localLeaderboardInput"
+    class="content-grid full-width"
+    style="margin-bottom: 1rem; justify-content: center; display: grid"
+  >
+    <input
+      type="text"
+      id="localLeaderboardName"
+      placeholder="Enter name for local leaderboard"
+      style="
+        background: var(--bg-color);
+        color: var(--main-color);
+        border: 2px solid var(--sub-color);
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        font-family: var(--font-family);
+        font-size: 1.2rem;
+        text-align: center;
+      "
+    />
   </div>
   <div id="typingTest" class="content-grid full-width-padding">
     <div id="capsWarning" class="hidden">

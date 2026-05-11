@@ -22,11 +22,7 @@ import {
   indexedDBLocalPersistence,
   getAdditionalUserInfo,
 } from "firebase/auth";
-import {
-  createErrorMessage,
-  isDevEnvironment,
-  promiseWithResolvers,
-} from "./utils/misc";
+import { createErrorMessage, promiseWithResolvers } from "./utils/misc";
 
 import {
   Analytics as AnalyticsType,
@@ -34,7 +30,6 @@ import {
 } from "firebase/analytics";
 import { tryCatch } from "@monkeytype/util/trycatch";
 import { dispatch as dispatchSignUpEvent } from "./observables/google-sign-up-event";
-import { addBanner } from "./stores/banners";
 
 let app: FirebaseApp | undefined;
 let Auth: AuthType | undefined;
@@ -68,13 +63,6 @@ export async function init(callback: ReadyCallback): Promise<void> {
 
     if (!firebaseConfig || firebaseConfig.apiKey === "") {
       await callback(false, null);
-      if (isDevEnvironment()) {
-        addBanner({
-          level: "notice",
-          text: "Dev Info: Firebase skipped (no config)",
-          icon: "fas fa-info-circle",
-        });
-      }
       return;
     }
 
@@ -96,13 +84,6 @@ export async function init(callback: ReadyCallback): Promise<void> {
     Auth = undefined;
     console.error("Firebase failed to initialize", e);
     await callback(false, null);
-    if (isDevEnvironment()) {
-      addBanner({
-        level: "notice",
-        text: "Dev Info: Firebase failed to initialize",
-        icon: "fas fa-exclamation-triangle",
-      });
-    }
   } finally {
     resolveAuthPromise();
   }

@@ -1,7 +1,7 @@
 import { Config, CustomThemeColors } from "@monkeytype/schemas/configs";
 
 const obj: Config = {
-  theme: "serika_dark",
+  theme: "sonokai",
   themeLight: "serika",
   themeDark: "serika_dark",
   autoSwitchTheme: false,
@@ -26,7 +26,7 @@ const obj: Config = {
   punctuation: false,
   numbers: false,
   words: 50,
-  time: 30,
+  time: 15,
   mode: "time",
   quoteLength: [1],
   language: "english",

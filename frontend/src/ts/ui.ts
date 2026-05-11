@@ -6,12 +6,11 @@ import * as ConfigEvent from "./observables/config-event";
 import { debounce, throttle } from "throttle-debounce";
 import * as TestUI from "./test/test-ui";
 import { getActivePage, getGlobalOffsetTop } from "./signals/core";
-import { isDevEnvironment } from "./utils/misc";
 import { isCustomTextLong } from "./states/custom-text-name";
 import { canQuickRestart } from "./utils/quick-restart";
 import { FontName } from "@monkeytype/schemas/fonts";
 import { applyFontFamily } from "./controllers/theme-controller";
-import { qs, qsr } from "./utils/dom";
+import { qsr } from "./utils/dom";
 import { createEffect } from "solid-js";
 import { convertRemToPixels } from "./utils/numbers";
 
@@ -43,16 +42,6 @@ export function setMediaQueryDebugLevel(level: number): void {
   }
 }
 
-if (isDevEnvironment()) {
-  qs("header #logo .top")?.setText("localhost");
-  qs("head title")?.setText(
-    (qs("head title")?.native.textContent ?? "") + " (localhost)",
-  );
-  qs("body")?.appendHtml(
-    `<div class="devIndicator tl">local</div><div class="devIndicator br">local</div>`,
-  );
-}
-
 window.addEventListener("beforeunload", (event) => {
   // Cancel the event as stated by the standard.
   if (
@@ -68,9 +57,6 @@ window.addEventListener("beforeunload", (event) => {
   } else {
     if (TestState.isActive) {
       event.preventDefault();
-      // Included for legacy support, e.g. Chrome/Edge < 119
-      // oxlint-disable-next-line no-deprecated
-      event.returnValue = "";
     }
   }
 });
