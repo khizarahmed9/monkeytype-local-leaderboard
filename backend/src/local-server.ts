@@ -81,7 +81,7 @@ app.post("/local-leaderboards", (req: Request, res: Response): void => {
 if (fs.existsSync(FRONTEND_DIST)) {
   app.use(express.static(FRONTEND_DIST));
   // SPA fallback — serve index.html for any unmatched route so the frontend router handles it
-  app.get("*", (_req: Request, res: Response) => {
+  app.use((_req: Request, res: Response) => {
     res.sendFile(path.join(FRONTEND_DIST, "index.html"));
   });
 }
