@@ -249,7 +249,51 @@ nav {
   }
 }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.headerCenter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+.headerSeparator {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--sub-color);
+  opacity: 0.35;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+#hackhccLogo {
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  img {
+    height: 2rem;
+    width: auto;
+  }
+}
+
 header {
+  position: relative;
   grid-template-areas: "logo menu";
   line-height: 2.3rem;
   font-size: 2.3rem;
@@ -436,6 +480,16 @@ header {
 
     #logo .bottom {
       opacity: 0 !important;
+    }
+
+    .headerSeparator,
+    #hackhccLogo {
+      opacity: 0 !important;
+    }
+
+    .headerCenter {
+      color: transparent;
+      pointer-events: none;
     }
 
     .config {
