@@ -164,6 +164,21 @@ The app is now live at **https://typing.yourdomain.com**.
 
 ---
 
+## Updating the server
+
+SSH into the VM, then:
+
+```bash
+cd monkeytype-local-leaderboard
+git pull
+npm run build-prod
+pm2 restart monkeytype
+```
+
+That's it — `git pull` fetches the latest code, `build-prod` rebuilds the frontend, and PM2 restarts the backend to pick up both changes.
+
+---
+
 ## Managing scores
 
 Scores are stored in `backend/local_leaderboard.csv`:

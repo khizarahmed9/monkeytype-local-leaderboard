@@ -91,16 +91,6 @@ export function startTest(now: number): boolean {
     return false;
   }
 
-  const nameInput = document.getElementById(
-    "localLeaderboardName",
-  ) as HTMLInputElement | null;
-  if (nameInput !== null && !nameInput.value.trim()) {
-    Notifications.add("Please enter your name for the local leaderboard", 0, {
-      important: true,
-    });
-    return false;
-  }
-
   if (isAuthenticated()) {
     void AnalyticsController.log("testStarted");
   } else {
@@ -1562,6 +1552,16 @@ qs("header")?.onChild("click", "nav #startTestButton, #logo", () => {
   if (getActivePage() === "test") restart();
   // Result.showConfetti();
 });
+
+(function initLocalLeaderboardNameInput(): void {
+  const nameInput = document.getElementById(
+    "localLeaderboardName",
+  ) as HTMLInputElement | null;
+  if (nameInput === null) return;
+  nameInput.addEventListener("input", () => {
+    nameInput.classList.toggle("has-name", nameInput.value.trim().length > 0);
+  });
+})();
 
 // ===============================
 

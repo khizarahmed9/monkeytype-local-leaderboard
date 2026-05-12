@@ -95,6 +95,41 @@
     }
   }
 
+  #localLeaderboardInput {
+    margin-bottom: 1rem;
+    justify-content: center;
+    display: grid;
+
+    .localLeaderboardNameInput {
+      background: var(--bg-color);
+      color: var(--main-color);
+      border: 2px solid var(--sub-color);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      font-family: var(--font-family);
+      font-size: 1.2rem;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+      animation: nameInputPulse 1.5s ease-in-out infinite;
+
+      &.has-name {
+        border-color: var(--main-color);
+        animation: none;
+      }
+    }
+  }
+
+  @keyframes nameInputPulse {
+    0%,
+    100% {
+      border-color: var(--sub-color);
+    }
+    50% {
+      border-color: var(--main-color);
+    }
+  }
+
   #typingTest {
     position: relative;
     width: 100%;

@@ -16,6 +16,14 @@ import * as SlowTimer from "../../states/slow-timer";
  * @returns Whether to prevent the default insertion behavior.
  */
 export function onBeforeInsertText(data: string): boolean {
+  const nameInput = document.getElementById(
+    "localLeaderboardName",
+  ) as HTMLInputElement | null;
+  if (nameInput !== null && !nameInput.value.trim()) {
+    nameInput.focus();
+    return true;
+  }
+
   if (TestState.testRestarting) {
     return true;
   }
