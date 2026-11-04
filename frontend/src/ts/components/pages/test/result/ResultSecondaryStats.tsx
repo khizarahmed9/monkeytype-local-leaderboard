@@ -1,43 +1,16 @@
 import { getFunbox } from "@monkeytype/funbox";
-import { isSafeNumber, roundTo2 } from "@monkeytype/util/numbers";
-import { Link } from "@tanstack/solid-router";
-import {
-  createMemo,
-  createResource,
-  For,
-  JSXElement,
-  Show,
-  Suspense,
-} from "solid-js";
+import { roundTo2 } from "@monkeytype/util/numbers";
+import { createMemo, For, JSXElement, Show } from "solid-js";
 
-import Ape from "../../../../ape";
-import { useTagsLiveQuery } from "../../../../collections/tags";
 import { getConfig } from "../../../../config/store";
-import QuotesController, {
-  Quote,
-} from "../../../../controllers/quotes-controller";
-import * as DB from "../../../../db";
-import { createTrigger } from "../../../../hooks/createTrigger";
-import { getFormatting, isAuthenticated } from "../../../../states/core";
-import { showEditResultTagsModal } from "../../../../states/edit-result-tags";
-import { hideLoaderBar, showLoaderBar } from "../../../../states/loader-bar";
-import { addNotificationWithLevel } from "../../../../states/notifications";
-import {
-  getQuoteStats,
-  quoteStats,
-  showQuoteRateModal,
-} from "../../../../states/quote-rate";
-import { showQuoteReportModal } from "../../../../states/quote-report";
+import { Quote } from "../../../../controllers/quotes-controller";
+import { getFormatting } from "../../../../states/core";
 import { ResultDetails, resultState } from "../../../../states/result";
-import { getSnapshot } from "../../../../states/snapshot";
 import { CompletedResult } from "../../../../states/test";
 import { cn } from "../../../../utils/cn";
 import { secondsToString } from "../../../../utils/date-and-time";
 import { getLanguageDisplayString } from "../../../../utils/strings";
-import { AnimeShow } from "../../../common/anime";
 import { Balloon } from "../../../common/Balloon";
-import { Button } from "../../../common/Button";
-import { Fa } from "../../../common/Fa";
 import { speedBalloon } from "./speed-balloon";
 
 type Props = {
@@ -91,9 +64,6 @@ export function ResultSecondaryStats(props: Props): JSXElement {
         <div class="text-main" data-ui-element="resultStatValue">
           <Lines lines={testType()} />
         </div>
-        <Suspense>
-          <Tags />
-        </Suspense>
       </div>
       <Show when={other().length > 0}>
         <div data-ui-element="resultStat">
@@ -153,36 +123,6 @@ export function ResultSecondaryStats(props: Props): JSXElement {
         </Balloon>
       </div>
 
-      <AnimeShow
-        when={resultState.dailyLeaderboardRank !== undefined}
-        duration={250}
-        class="max-w-52 whitespace-nowrap"
-      >
-        <div class="text-sub">daily leaderboard</div>
-        <Link
-          to="/leaderboards"
-          search={{
-            type: "daily",
-            language: props.result.language,
-            mode2: props.result.mode2,
-            goToUserPage: true,
-          }}
-        >
-          <Balloon
-            data-ui-element="resultStatValue"
-            text="Show daily leaderboard"
-            class={cn(
-              "block text-[2em] leading-[1em] text-main",
-              mobileBalloonClass,
-            )}
-          >
-            {format().rank(resultState.dailyLeaderboardRank, {
-              fallback: "",
-            })}
-          </Balloon>
-        </Link>
-      </AnimeShow>
-
       <Show when={resultState.details?.quote}>
         {(quote) => <QuoteSource quote={quote()} />}
       </Show>
@@ -209,168 +149,14 @@ function Lines(props: { lines: string[] }): JSXElement {
   );
 }
 
-function Tags(): JSXElement {
-  const userTags = useTagsLiveQuery();
-  const tagNames = createMemo(
-    () => new Map((userTags() ?? []).map((t) => [t._id, t.name])),
-  );
-
-  const openEditModal = (): void => {
-    if (tagNames().size === 0 || resultState.resultId === "") return;
-    showEditResultTagsModal({
-      _id: resultState.resultId,
-      tags: resultState.tags.map((t) => t.id),
-      source: "resultPage",
-    });
-  };
-
-  const tags = () =>
-    resultState.tags.flatMap((tag) => {
-      const name = tagNames().get(tag.id);
-      return name === undefined ? [] : [{ ...tag, name }];
-    });
-
-  return (
-    <Show when={tagNames().size > 0}>
-      <div class="mt-2">
-        <div class={cn("text-sub", "flex items-center")}>
-          <span>tags</span>
-          <Button
-            variant="text"
-            fa={{ icon: "fa-pen", fixedWidth: true }}
-            onClick={openEditModal}
-            balloon={{
-              text: "Edit tags",
-              position: "right",
-            }}
-            class={cn("-my-2 p-1", resultState.resultId === "" && "invisible")}
-          />
-        </div>
-        <div class="text-main" data-ui-element="resultStatValue">
-          <Show when={tags().length > 0} fallback={<div>no tags</div>}>
-            <For each={tags()}>
-              {(tag) => (
-                <Balloon text={tag.balloon} class="flex">
-                  {tag.name}
-                  <Show when={tag.isPb}>
-                    <Fa icon="fa-crown" class="ml-2" />
-                  </Show>
-                </Balloon>
-              )}
-            </For>
-          </Show>
-        </div>
-      </div>
-    </Show>
-  );
-}
-
 function QuoteSource(props: { quote: Quote }): JSXElement {
   return (
     <div class="max-w-120" data-ui-element="resultStat">
-      <div class={cn("text-sub", "flex items-center")}>
-        <span class="mr-2">source</span>
-        <Show when={isAuthenticated()}>
-          <QuoteButtons quote={props.quote} />
-        </Show>
-      </div>
+      <div class="text-sub">source</div>
       <div class="text-main" data-ui-element="resultStatValue">
         {props.quote.source}
       </div>
     </div>
-  );
-}
-
-function QuoteButtons(props: { quote: Quote }): JSXElement {
-  // favorites live in the non-reactive DB snapshot, refreshed after each toggle
-  const [trackFavorites, refreshFavorites] = createTrigger();
-  const isFavorite = (): boolean => {
-    trackFavorites();
-    return QuotesController.isQuoteFavorite(props.quote);
-  };
-  // fills quoteStats() in states/quote-rate, which the rate modal also updates
-  // keyed on the details too, since restart clears stats and a repeated quote is the same object.
-  // not the result - it's set before the details, so it would fetch the previous quote
-  const [statsRequest] = createResource(
-    () => ({ quote: props.quote, details: resultState.details }),
-    async ({ quote }) => getQuoteStats(quote),
-  );
-
-  const isRated = (): boolean =>
-    isSafeNumber(
-      getSnapshot()?.quoteRatings?.[props.quote.language]?.[props.quote.id],
-    );
-
-  const rating = (): string => {
-    if (statsRequest.error !== undefined) return "?";
-    return quoteStats()?.average?.toFixed(1) ?? "";
-  };
-
-  const toggleFavorite = async (): Promise<void> => {
-    const dbSnapshot = DB.getSnapshot();
-    if (!dbSnapshot) return;
-    const language = props.quote.language;
-    const quoteId = props.quote.id.toString();
-    const remove = isFavorite();
-
-    showLoaderBar();
-    const response = remove
-      ? await Ape.users.removeQuoteFromFavorites({
-          body: { language, quoteId },
-        })
-      : await Ape.users.addQuoteToFavorites({ body: { language, quoteId } });
-    hideLoaderBar();
-
-    addNotificationWithLevel(
-      response.body.message,
-      response.status === 200 ? "success" : "error",
-    );
-    if (response.status !== 200) return;
-
-    if (remove) {
-      const list = dbSnapshot.favoriteQuotes?.[language];
-      list?.splice(list.indexOf(quoteId), 1);
-    } else {
-      dbSnapshot.favoriteQuotes ??= {};
-      dbSnapshot.favoriteQuotes[language] ??= [];
-      dbSnapshot.favoriteQuotes[language]?.push(quoteId);
-    }
-    refreshFavorites();
-  };
-
-  return (
-    <>
-      <Button
-        variant="text"
-        class="-my-1 p-1"
-        balloon={{ text: "Report quote" }}
-        fa={{ icon: "fa-flag", fixedWidth: true }}
-        onClick={() => showQuoteReportModal(props.quote.id)}
-      />
-      <Button
-        variant="text"
-        class="-my-1 p-1"
-        balloon={{ text: "Favorite quote" }}
-        fa={{
-          icon: "fa-heart",
-          variant: isFavorite() ? "solid" : "regular",
-          fixedWidth: true,
-        }}
-        onClick={() => void toggleFavorite()}
-      />
-      <Button
-        variant="text"
-        class="-my-1 p-1"
-        balloon={{ text: "Rate quote" }}
-        fa={{
-          icon: "fa-star",
-          variant: isRated() ? "solid" : "regular",
-          fixedWidth: true,
-        }}
-        text={rating()}
-        onClick={() => showQuoteRateModal(props.quote)}
-      />
-    </>
   );
 }
 

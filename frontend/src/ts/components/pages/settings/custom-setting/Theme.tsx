@@ -1,14 +1,7 @@
-import { CustomTheme, CustomThemeNameSchema } from "@monkeytype/schemas/users";
-import { For, JSXElement, Show, Suspense, untrack } from "solid-js";
+import { For, JSXElement, Show, untrack } from "solid-js";
 import { debounce } from "throttle-debounce";
 import { z } from "zod";
 
-import {
-  addCustomTheme,
-  deleteCustomTheme,
-  editCustomTheme,
-  useCustomThemesLiveQuery,
-} from "../../../../collections/custom-themes";
 import { configMetadata } from "../../../../config/metadata";
 import { setConfig } from "../../../../config/setters";
 import { getConfig } from "../../../../config/store";
@@ -22,7 +15,6 @@ import {
   convertThemeToCustomColors,
 } from "../../../../controllers/theme-controller";
 import { createEffectOn } from "../../../../hooks/effects";
-import { isAuthenticated } from "../../../../states/core";
 import {
   showErrorNotification,
   showNoticeNotification,
@@ -52,8 +44,6 @@ export const sortedThemes: ThemeWithName[] = [...ThemesList].sort((a, b) => {
 });
 
 export function Theme(): JSXElement {
-  const customThemes = useCustomThemesLiveQuery();
-
   const Presets = () => (
     <div class="grid gap-4">
       <Show when={getConfig.favThemes.length > 0}>
@@ -84,15 +74,6 @@ export function Theme(): JSXElement {
 
   const Customs = () => (
     <div class="grid gap-4">
-      <Show when={isAuthenticated()}>
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-2">
-          <Suspense>
-            <For each={customThemes()}>
-              {(theme) => <CustomThemeButton theme={theme} />}
-            </For>
-          </Suspense>
-        </div>
-      </Show>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Picker color="bg" />
         <Picker color="main" />
@@ -195,44 +176,16 @@ export function Theme(): JSXElement {
             });
           }}
         />
-        <Show when={isAuthenticated()}>
-          <Button
-            text="save as new"
-            onClick={() => {
-              if (customThemes().length >= 20) {
-                showNoticeNotification("Custom themes limit reached");
-                return;
-              }
-
-              void addCustomTheme({
-                name: "custom",
-                colors: convertThemeToCustomColors(getTheme()),
-              })
-                .then(() => {
-                  showSuccessNotification("Custom theme saved");
-                })
-                .catch((e: unknown) => {
-                  showErrorNotification(
-                    e instanceof Error
-                      ? e.message
-                      : "Failed to save custom theme",
-                  );
-                });
-            }}
-          />
-        </Show>
-        <Show when={!isAuthenticated()}>
-          <Button
-            text="save"
-            onClick={() => {
-              setConfig(
-                "customThemeColors",
-                convertThemeToCustomColors(getTheme()),
-              );
-              showSuccessNotification("Custom theme colors saved");
-            }}
-          />
-        </Show>
+        <Button
+          text="save"
+          onClick={() => {
+            setConfig(
+              "customThemeColors",
+              convertThemeToCustomColors(getTheme()),
+            );
+            showSuccessNotification("Custom theme colors saved");
+          }}
+        />
       </div>
     </div>
   );
@@ -308,130 +261,6 @@ export function Theme(): JSXElement {
   );
 }
 
-function CustomThemeButton(props: { theme: CustomTheme }): JSXElement {
-  const themeColors = () => convertCustomColorsToTheme(props.theme.colors);
-
-  return (
-    <button
-      type="button"
-      style={{
-        "--bg": themeColors().bg,
-        "--main": themeColors().main,
-        "--sub": themeColors().sub,
-        "--text": themeColors().text,
-      }}
-      class={cn(
-        "group/theme grid grid-cols-[auto_1fr_auto] justify-between p-0 ring-4 ring-transparent",
-        "bg-(--bg) text-(--main)",
-        "hover:ring-(--main)",
-        "transition-[opacity,color,background,box-shadow] duration-125",
-      )}
-      onClick={() => {
-        setConfig("customThemeColors", props.theme.colors);
-      }}
-      data-theme-id={props.theme._id}
-    >
-      <Button
-        variant="text"
-        fa={{
-          icon: "fa-pen",
-          fixedWidth: true,
-        }}
-        class={cn(
-          "mx-1 p-2",
-          "[--themable-button-hover-text:var(--main)] [--themable-button-text:var(--sub)]",
-          "opacity-0 group-hover/theme:opacity-100",
-        )}
-        onClick={(e) => {
-          e.stopPropagation();
-          showSimpleModal({
-            title: "Update custom theme",
-            schema: z.object({
-              name: CustomThemeNameSchema,
-              updateColors: z.boolean(),
-            }),
-            inputs: {
-              name: {
-                type: "text",
-                initVal: replaceUnderscoresWithSpaces(props.theme.name),
-                preprocess: normalizeName,
-              },
-              updateColors: {
-                type: "checkbox",
-                initVal: false,
-                label: "Update custom theme to current colors",
-              },
-            },
-            buttonText: "update",
-            execFn: async ({ name, updateColors }) => {
-              if (name === undefined) {
-                return {
-                  status: "error",
-                  message: "Name is required",
-                };
-              }
-              editCustomTheme({
-                themeId: props.theme._id,
-                name,
-                colors: updateColors
-                  ? convertThemeToCustomColors(untrack(() => getTheme()))
-                  : untrack(() => props.theme.colors),
-              })
-                .then(() => {
-                  showSuccessNotification("Updated");
-                })
-                .catch(() => {
-                  showErrorNotification(
-                    e instanceof Error
-                      ? e.message
-                      : "Failed to update custom theme",
-                  );
-                });
-
-              return {
-                status: "success",
-                showNotification: false,
-              };
-            },
-          });
-        }}
-      />
-      <div>{replaceUnderscoresWithSpaces(props.theme.name)}</div>
-      <Button
-        variant="text"
-        fa={{
-          icon: "fa-trash",
-          fixedWidth: true,
-        }}
-        class={cn(
-          "mx-1 p-2",
-          "[--themable-button-hover-text:var(--main)] [--themable-button-text:var(--sub)]",
-          "opacity-0 group-hover/theme:opacity-100",
-        )}
-        onClick={(e) => {
-          e.stopPropagation();
-          showSimpleModal({
-            title: "Delete custom theme",
-            text: `Are you sure you want to delete the custom theme "${replaceUnderscoresWithSpaces(props.theme.name)}"? This action cannot be undone.`,
-            buttonText: "delete",
-            execFn: async () => {
-              void deleteCustomTheme({
-                themeId: props.theme._id,
-              });
-              return {
-                status: "success",
-                message: "Custom theme deleted",
-              };
-            },
-          });
-        }}
-      />
-    </button>
-  );
-}
-
-// rendered ~200 times on the settings page - kept to as few elements and
-// reactive bindings as possible
 function ThemeButton(props: { theme: ThemeWithName }): JSXElement {
   const isActive = () => getConfig.theme === props.theme.name;
   const isFav = () => getConfig.favThemes.includes(props.theme.name);

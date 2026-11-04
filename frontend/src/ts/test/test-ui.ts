@@ -1,4 +1,3 @@
-import { isOnline, showOfflineBanner } from "../states/connection";
 import { Config } from "../config/store";
 import * as TestWords from "./test-words";
 import { getCurrentInput } from "./events/data";
@@ -16,7 +15,6 @@ import {
   isInputElementFocused,
 } from "../input/input-element";
 import * as MonkeyPower from "../elements/monkey-power";
-import * as AdController from "../controllers/ad-controller";
 import * as ThemeController from "../controllers/theme-controller";
 import { ElementWithUtils } from "../utils/dom";
 import {
@@ -26,7 +24,6 @@ import {
   setWordInput,
   truncateWords,
 } from "../states/words-render";
-import { skipBreakdownEvent } from "../states/header";
 import {
   isDirectionReversed,
   isRtlCheckedByLetter,
@@ -259,18 +256,12 @@ export function onTestRestart(source: "testPage" | "resultPage"): void {
   setTestInitError(null);
   focusWords(true);
 
-  if (!isOnline()) {
-    showOfflineBanner();
-  }
-
   if (source === "resultPage") {
     if (Config.randomTheme !== "off") {
       void ThemeController.randomizeTheme();
     }
-    skipBreakdownEvent.dispatch();
   }
 
-  AdController.destroyResult();
   void SoundController.clearAllSounds();
   replaceWords(
     Config.mode === "zen"

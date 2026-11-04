@@ -1,16 +1,10 @@
 import * as TestWords from "./test-words";
 import { Config } from "../config/store";
-import * as DB from "../db";
-import { getActiveTagsPB } from "../collections/tags";
 import * as Misc from "../utils/misc";
 import { configEvent } from "../events/config";
 import { getActiveFunboxes } from "./funbox/list";
 import { Caret } from "../elements/caret";
 import { ElementWithUtils } from "../utils/dom";
-import {
-  getUserAverage10Once,
-  getUserDailyBestOnce,
-} from "../collections/results";
 import {
   isDirectionReversed,
   isLanguageRightToLeft,
@@ -84,33 +78,7 @@ export async function init(): Promise<void> {
   caret?.hide();
   const mode2 = Misc.getMode2(Config, getCurrentQuote());
   let wpm = 0;
-  if (Config.paceCaret === "pb") {
-    wpm =
-      DB.getLocalPB(
-        Config.mode,
-        mode2,
-        Config.punctuation,
-        Config.numbers,
-        Config.language,
-        Config.difficulty,
-        Config.lazyMode,
-        getActiveFunboxes(),
-      )?.wpm ?? 0;
-  } else if (Config.paceCaret === "tagPb") {
-    wpm = getActiveTagsPB(
-      Config.mode,
-      mode2,
-      Config.punctuation,
-      Config.numbers,
-      Config.language,
-      Config.difficulty,
-      Config.lazyMode,
-    );
-  } else if (Config.paceCaret === "average") {
-    wpm = Math.round((await getUserAverage10Once({ ...Config, mode2 })).wpm);
-  } else if (Config.paceCaret === "daily") {
-    wpm = Math.round((await getUserDailyBestOnce({ ...Config, mode2 })).wpm);
-  } else if (Config.paceCaret === "custom") {
+  if (Config.paceCaret === "custom") {
     wpm = Config.paceCaretCustomSpeed;
   } else if (Config.paceCaret === "last" || isPaceRepeat()) {
     wpm = lastTestWpm;

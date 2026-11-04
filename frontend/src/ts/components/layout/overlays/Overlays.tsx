@@ -53,17 +53,6 @@ function DevButtons(): JSXElement {
   return (
     <div class="fixed top-30 left-0 z-10000 flex w-max flex-col gap-2 text-xs">
       <Button
-        href={`${envConfig.backendUrl}/configure/`}
-        balloon={{
-          text: "Configure server",
-          position: "right",
-        }}
-        fa={{
-          icon: "fa-server",
-        }}
-        class="rounded-tl-none rounded-bl-none p-2"
-      />
-      <Button
         balloon={{
           text: "Dev options",
           position: "right",

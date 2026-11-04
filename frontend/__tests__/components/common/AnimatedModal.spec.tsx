@@ -6,7 +6,7 @@ import { hideModal, showModal } from "../../../src/ts/states/modals";
 
 describe("AnimatedModal", () => {
   beforeEach(() => {
-    showModal("Support");
+    showModal("Alerts");
     vi.clearAllMocks();
 
     // Mock dialog methods that don't exist in jsdom
@@ -30,7 +30,7 @@ describe("AnimatedModal", () => {
     modalDiv: HTMLDivElement;
   } {
     const { container } = render(() => (
-      <AnimatedModal id="Support" {...props}>
+      <AnimatedModal id="Alerts" {...props}>
         <div data-testid="modal-content">Test Content</div>
       </AnimatedModal>
     ));
@@ -48,7 +48,7 @@ describe("AnimatedModal", () => {
   it("renders dialog with correct id and class", () => {
     const { dialog } = renderModal({});
 
-    expect(dialog).toHaveAttribute("id", "SupportModal");
+    expect(dialog).toHaveAttribute("id", "AlertsModal");
   });
 
   it("renders children inside modal div", () => {
@@ -60,7 +60,7 @@ describe("AnimatedModal", () => {
   });
 
   it("doesnt render children if not open", () => {
-    hideModal("Support");
+    hideModal("Alerts");
     const { modalDiv } = renderModal({});
 
     expect(modalDiv).not.toBeInTheDocument();
@@ -91,6 +91,6 @@ describe("AnimatedModal", () => {
       animationMode: "none",
     });
 
-    expect(dialog).toHaveAttribute("id", "SupportModal");
+    expect(dialog).toHaveAttribute("id", "AlertsModal");
   });
 });

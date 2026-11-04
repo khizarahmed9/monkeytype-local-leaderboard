@@ -11,7 +11,6 @@ import { getGlobalOffsetTop, isAppReady } from "../../states/core";
 import { isFocusMode } from "../../states/test";
 import { cn } from "../../utils/cn";
 import { convertRemToPixels } from "../../utils/numbers";
-import { Advertisement } from "../common/Advertisement";
 import { Anime } from "../common/anime";
 import { DevTools } from "../dev/DevTools";
 import { FocusModeExit } from "../layout/FocusModeExit";
@@ -50,20 +49,9 @@ export function App(): JSXElement {
       >
         <Header />
         <main class="full-width content-grid h-full">
-          <Advertisement
-            id="ad-vertical-left"
-            visible={["on", "sellout"]}
-            vertical
-          />
           <RouteRenderer router={router} />
-          <Advertisement
-            id="ad-vertical-right"
-            visible={["on", "sellout"]}
-            vertical
-          />
         </main>
         <Footer />
-        <Advertisement id="ad-footer" visible={"sellout"} />
       </Anime>
       <DevTools />
     </Providers>

@@ -1,39 +1,17 @@
-// The app's router instance: real auth and query client, the router type
-// registration, and app-only side effects (title, og:url, focus, ads).
+// The app's router instance: real query client, the router type
+// registration, and app-only side effects (title, og:url, focus).
 // Importing it creates the router - tests use createAppRouter instead
 
-import * as AdController from "../controllers/ad-controller";
-import { authEvent } from "../events/auth";
-import { isAuthAvailable } from "../firebase";
 import { queryClient } from "../queries";
-import { isAuthenticated } from "../states/core";
 import { getRoutePage } from "../states/router";
 import { setFocusMode } from "../states/test";
 import type { PageName } from "./routes";
 import { updateTitle } from "../utils/misc";
 import { capitalizeFirstLetterOfEachWord } from "../utils/strings";
-import { createRouterAuth } from "./create-router-auth";
 import { createAppRouter } from "./create-router";
 import { setRouter } from "./instance";
 
-const auth = createRouterAuth({
-  isAvailable: isAuthAvailable,
-  isSignedIn: isAuthenticated,
-});
-
-authEvent.subscribe((event) => {
-  if (event.type !== "authStateChanged") return;
-  auth.stateChanged(
-    event.data.isUserSignedIn
-      ? {
-          download: event.data.loadPromise,
-          redownload: event.data.reloadUserData,
-        }
-      : undefined,
-  );
-});
-
-export const router = createAppRouter({ queryClient, auth });
+export const router = createAppRouter({ queryClient });
 
 declare module "@tanstack/solid-router" {
   // oxlint-disable-next-line typescript/consistent-type-definitions -- module augmentation needs an interface
@@ -61,7 +39,6 @@ router.subscribe("onResolved", () => {
 
   updatePageTitle(page);
   setFocusMode(false);
-  void AdController.reinstate();
 });
 
 function updatePageTitle(page: PageName): void {

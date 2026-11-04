@@ -47,10 +47,7 @@ export const SearchFlagSchema = z
   .catch(undefined);
 
 /** Routes keeping page state (selections, tabs...) in their search params. */
-export type SearchRoutePath =
-  | "/leaderboards"
-  | "/settings"
-  | "/account-settings";
+export type SearchRoutePath = "/settings";
 
 /** The validated search params of the route at `TPath`. */
 export type RouteSearch<TPath extends SearchRoutePath> = RouteById<
@@ -79,8 +76,8 @@ export function useRouteSearch<TPath extends SearchRoutePath>(
   const navigate = useNavigate();
   const router = useRouter();
   // these routes validate their search with a zod schema
-  const schema = router.routesById[`/userData${path}`].options
-    .validateSearch as {
+  const schema = router.routesById["/userData/settings"].options
+    .validateSearch as unknown as {
     parse: (search: unknown) => RouteSearch<TPath>;
   };
   // the raw search while the url is the route's

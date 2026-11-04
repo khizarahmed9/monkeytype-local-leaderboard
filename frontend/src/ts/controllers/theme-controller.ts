@@ -4,7 +4,6 @@ import { isColorDark, isColorLight } from "../utils/colors";
 import { Config } from "../config/store";
 import { setConfig } from "../config/setters";
 import { configEvent } from "../events/config";
-import * as CustomThemes from "../collections/custom-themes";
 import { showNoticeNotification } from "../states/notifications";
 import { debounce } from "throttle-debounce";
 import { CustomThemeColors, ThemeName } from "@monkeytype/schemas/configs";
@@ -83,18 +82,7 @@ function updateThemeIndicator(nameOverride?: string): void {
   if (randomTheme !== null) str = randomTheme;
 
   if (Config.customTheme && nameOverride === undefined) {
-    // Match current custom theme by colors since Config does not store custom theme IDs
-    const matchedTheme = CustomThemes.__nonReactive
-      .getCustomThemes()
-      .find((ct) =>
-        Arrays.areSortedArraysEqual(ct.colors, Config.customThemeColors),
-      );
-
-    if (matchedTheme) {
-      str = `${matchedTheme.name} (custom)`;
-    } else {
-      str = "custom";
-    }
+    str = "custom";
   }
 
   if (nameOverride !== undefined && nameOverride !== "") str = nameOverride;
@@ -179,10 +167,6 @@ async function changeThemeList(): Promise<void> {
     themesList = themes.map((t) => {
       return t.name;
     });
-  } else if (Config.randomTheme === "custom") {
-    themesList = CustomThemes.__nonReactive
-      .getCustomThemes()
-      .map((ct) => ct._id);
   }
   Arrays.shuffle(themesList);
   randomThemeIndex = 0;
@@ -210,27 +194,13 @@ export async function randomizeTheme(): Promise<void> {
     }
   } while (!filter(nextTheme.bg));
 
-  let colorsOverride: CustomThemeColors | undefined;
-
-  if (Config.randomTheme === "custom") {
-    const theme = CustomThemes.__nonReactive.getCustomTheme(randomTheme);
-    colorsOverride = theme?.colors;
-    randomTheme = "custom";
-  }
-
   setConfig("customTheme", false, {
     nosave: true,
   });
-  await apply(randomTheme, colorsOverride);
+  await apply(randomTheme);
 
   if (randomThemeIndex >= themesList.length) {
-    let name = randomTheme.replace(/_/g, " ");
-    if (Config.randomTheme === "custom") {
-      name = (
-        CustomThemes.__nonReactive.getCustomTheme(randomTheme)?.name ?? "custom"
-      ).replace(/_/g, " ");
-    }
-    showNoticeNotification(name);
+    showNoticeNotification(randomTheme.replace(/_/g, " "));
   }
 }
 

@@ -1,14 +1,9 @@
 import { createStore } from "solid-js/store";
 
 export type ModalId =
-  | "VersionHistory"
-  | "Contact"
-  | "Support"
   | "Commandline"
   | "DevOptions"
-  | "DevInboxPicker"
   | "EventLogViewer"
-  | "RegisterCaptcha"
   | "Alerts"
   | "SimpleModal"
   | "CustomText"
@@ -17,28 +12,11 @@ export type ModalId =
   | "WordFilter"
   | "CustomGenerator"
   | "QuoteSearch"
-  | "QuoteRate"
-  | "QuoteReport"
-  | "QuoteSubmit"
-  | "QuoteApprove"
   | "TestDuration"
   | "ShareTestSettings"
   | "CustomWordAmount"
   | "MobileTestConfig"
-  | "PbTables"
   | "PractiseWords"
-  | "MiniResultChartModal"
-  | "Cookies"
-  | "AddPresetModal"
-  | "EditPresetModal"
-  | "EditProfile"
-  | "ViewApeKey"
-  | "LastSignedOutResult"
-  | "StreakHourOffset"
-  | "GoogleSignup"
-  | "ForgotPassword"
-  | "UserReport"
-  | "EditResultTags"
   | "TheRest";
 
 export type ModalVisibility = {

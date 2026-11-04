@@ -53,12 +53,6 @@ export function createAppRouter(
   options: { history?: RouterHistory } = {},
 ) {
   const history = options.history ?? createBrowserHistory();
-  // TODO: remove once links started before the discord oauth redirect moved
-  // from /verify to / are gone (with its firebase.json rewrite)
-  if (history.location.pathname === "/verify") {
-    history.replace(history.location.href.replace(/^\/verify/, "/"));
-  }
-
   const router = createRouter({
     routeTree,
     context,
@@ -79,8 +73,7 @@ export function createAppRouter(
     defaultPendingMinMs: 500,
     // a failed load shows its error on the loading page, with a Retry button
     defaultErrorComponent: createNonRouterPage("loading", LoadingErrorPage),
-    // unknown urls (the root route renders it, see notFoundMode). The profile
-    // page shows its own message for unknown users
+    // unknown urls (the root route renders it, see notFoundMode)
     defaultNotFoundComponent: createNonRouterPage("404", NotFoundPage),
     notFoundMode: "root",
     trailingSlash: "never",
@@ -123,10 +116,6 @@ export function createAppRouter(
       return false;
     },
   });
-
-  // re-run guards and loaders when the user signs in or out. The initial load
-  // waits for the first auth state itself (the userData route's beforeLoad)
-  context.auth.onChange(() => void router.invalidate());
 
   // the loads are done: the bar fills up to "Done", then the loading page
   // hides (see PageSwitcher)

@@ -1,6 +1,5 @@
 import { createMemo } from "solid-js";
 
-import { useActiveTagsLiveQuery } from "../../../../collections/tags";
 import { getConfig } from "../../../../config/store";
 import { showCommandline } from "../../../../states/commandline";
 import { getCustomTextIndicator, getFormatting } from "../../../../states/core";
@@ -21,9 +20,7 @@ import {
   replaceUnderscoresWithSpaces,
 } from "../../../../utils/strings";
 import { Kbd } from "../../../common/Kbd";
-import { AverageNotice } from "./AverageNotice";
 import { Notice } from "./Notice";
-import { PbNotice } from "./PbNotice";
 
 export function TestModesNotice() {
   return (
@@ -46,8 +43,6 @@ export function TestModesNotice() {
       <BlindMode />
       <LazyMode />
       <PaceCaretNotice />
-      <AverageNotice />
-      <PbNotice />
       <MinSpeed />
       <MinAcc />
       <MinBurst />
@@ -57,7 +52,6 @@ export function TestModesNotice() {
       <DeleteOnError />
       <Layout />
       <OppositeShift />
-      <Tags />
     </div>
   );
 }
@@ -373,21 +367,6 @@ function OppositeShift() {
       icon="fa-exchange-alt"
       openCommandline="oppositeShiftMode"
       text={`opposite shift${getConfig.oppositeShiftMode === "keymap" ? " (keymap)" : ""}`}
-    />
-  );
-}
-
-function Tags() {
-  const tags = useActiveTagsLiveQuery();
-
-  return (
-    <Notice
-      when={tags().length > 0}
-      icon={tags().length === 1 ? "fa-tag" : "fa-tags"}
-      openCommandline="tags"
-      text={tags()
-        .map((tag) => tag.name)
-        .join(", ")}
     />
   );
 }

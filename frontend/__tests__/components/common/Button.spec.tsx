@@ -248,21 +248,15 @@ describe("Button component", () => {
         {() => (
           <>
             <Button to="/settings" text="Settings" />
-            <Button
-              to="/profile/$uidOrName"
-              params={{ uidOrName: "miodec" }}
-              text="Profile"
-            />
           </>
         )}
       </RouterContextProvider>
     ));
 
-    const [settings, profile] = container.querySelectorAll("a");
+    const [settings] = container.querySelectorAll("a");
     expect(settings).toHaveAttribute("href", "/settings");
     expect(settings).not.toHaveAttribute("target");
     expect(settings).toHaveAttribute("data-ui-element", "button");
-    expect(profile).toHaveAttribute("href", "/profile/miodec");
   });
 
   it("renders a router link with search params in its href", () => {
@@ -272,9 +266,9 @@ describe("Button component", () => {
       <RouterContextProvider router={router}>
         {() => (
           <Button
-            to="/leaderboards"
-            search={{ type: "daily", mode2: "15" }}
-            text="Leaderboards"
+            to="/settings"
+            search={{ highlight: "theme" }}
+            text="Settings"
           />
         )}
       </RouterContextProvider>
@@ -282,7 +276,7 @@ describe("Button component", () => {
 
     expect(container.querySelector("a")).toHaveAttribute(
       "href",
-      "/leaderboards?type=daily&mode2=15",
+      "/settings?highlight=theme",
     );
   });
 
@@ -295,20 +289,12 @@ describe("Button component", () => {
           <>
             {/* @ts-expect-error unknown route */}
             <Button to="/nope" text="Nope" />
-            {/* @ts-expect-error missing params */}
-            <Button to="/profile/$uidOrName" text="Profile" />
-            <Button
-              to="/profile/$uidOrName"
-              // @ts-expect-error unknown param
-              params={{ name: "miodec" }}
-              text="Profile"
-            />
           </>
         )}
       </RouterContextProvider>
     ));
 
-    expect(container.querySelectorAll("a")).toHaveLength(3);
+    expect(container.querySelectorAll("a")).toHaveLength(1);
   });
 
   it("navigates on click, but leaves cmd/ctrl+click to the browser", async () => {

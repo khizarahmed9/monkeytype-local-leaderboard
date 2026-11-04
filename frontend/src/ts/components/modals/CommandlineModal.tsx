@@ -17,7 +17,6 @@ import {
   CommandWithValidation,
 } from "../../commandline/types";
 import { Config } from "../../config/store";
-import * as AnalyticsController from "../../controllers/analytics-controller";
 import * as ThemeController from "../../controllers/theme-controller";
 import { createInputEventHandler } from "../../elements/input-validation";
 import { isInputElementFocused } from "../../input/input-element";
@@ -451,7 +450,6 @@ export function CommandlineModal(): JSXElement {
       command.exec?.({ input: inputValue() });
     }
 
-    void AnalyticsController.log("usedCommandLine", { command: command.id });
     hide();
   };
 
@@ -485,7 +483,6 @@ export function CommandlineModal(): JSXElement {
       return;
     }
 
-    void AnalyticsController.log("usedCommandLine", { command: command.id });
     if (command.opensModal === true) return;
 
     if (isModalOpen(MODAL_ID)) {

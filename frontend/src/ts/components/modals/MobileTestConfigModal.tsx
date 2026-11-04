@@ -8,7 +8,6 @@ import { For, JSXElement, Show } from "solid-js";
 
 import { setConfig, setQuoteLengthAll } from "../../config/setters";
 import { getConfig } from "../../config/store";
-import { isAuthenticated } from "../../states/core";
 import { showModal } from "../../states/modals";
 import { restartTest } from "../../test/test-logic";
 import { areUnsortedArraysEqual } from "../../utils/arrays";
@@ -23,14 +22,12 @@ const wordCounts = [10, 25, 50, 100];
 const quoteLengths: {
   value: string;
   label: string;
-  loginRequired?: boolean;
 }[] = [
   { value: "all", label: "all" },
   { value: "0", label: "short" },
   { value: "1", label: "medium" },
   { value: "2", label: "long" },
   { value: "3", label: "thicc" },
-  { value: "-3", label: "favorite", loginRequired: true },
   { value: "-2", label: "search" },
 ] as const;
 
@@ -188,13 +185,11 @@ export function MobileTestConfigModal(): JSXElement {
           <Show when={getConfig.mode === "quote"}>
             <For each={quoteLengths}>
               {(ql) => (
-                <Show when={!("loginRequired" in ql) || isAuthenticated()}>
-                  <MCButton
-                    text={ql.label}
-                    active={isQuoteLengthActive(ql.value)}
-                    onClick={(e) => handleQuoteLengthClick(ql.value, e)}
-                  />
-                </Show>
+                <MCButton
+                  text={ql.label}
+                  active={isQuoteLengthActive(ql.value)}
+                  onClick={(e) => handleQuoteLengthClick(ql.value, e)}
+                />
               )}
             </For>
           </Show>

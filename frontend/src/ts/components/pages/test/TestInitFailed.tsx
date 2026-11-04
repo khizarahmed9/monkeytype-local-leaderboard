@@ -10,7 +10,7 @@ export function TestInitFailed(): JSXElement {
       <div class="max-w-[800px] justify-self-center [grid-area:content]">
         <div>
           Test initialization failed. Please try different settings or
-          refreshing the page. If the problem persists, please contact support.
+          refreshing the page.
         </div>
         <Show when={getTestInitError()}>
           <div class="mt-8">{getTestInitError()}</div>

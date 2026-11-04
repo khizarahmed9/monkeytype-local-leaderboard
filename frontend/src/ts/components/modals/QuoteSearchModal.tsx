@@ -9,14 +9,11 @@ import {
 } from "solid-js";
 import { z } from "zod";
 
-import Ape from "../../ape";
 import { setConfig } from "../../config/setters";
 import { Config } from "../../config/store";
 import QuotesController, { Quote } from "../../controllers/quotes-controller";
-import * as DB from "../../db";
 import { createTrigger } from "../../hooks/createTrigger";
 import { createDebouncedEffectOn } from "../../hooks/effects";
-import { isAuthenticated } from "../../states/core";
 import { hideLoaderBar, showLoaderBar } from "../../states/loader-bar";
 import {
   hideModalAndClearChain,
@@ -27,7 +24,6 @@ import {
   showNoticeNotification,
   showErrorNotification,
 } from "../../states/notifications";
-import { showQuoteReportModal } from "../../states/quote-report";
 import { showSimpleModal } from "../../states/simple-modal";
 import { setSelectedQuoteId } from "../../states/test";
 import * as TestLogic from "../../test/test-logic";
@@ -44,8 +40,6 @@ import { AnimatedModal } from "../common/AnimatedModal";
 import { Button } from "../common/Button";
 import { InputField } from "../ui/form/InputField";
 import SlimSelect from "../ui/SlimSelect";
-import { QuoteApproveModal } from "./QuoteApproveModal";
-import { QuoteSubmitModal } from "./QuoteSubmitModal";
 
 const PAGE_SIZE = 100;
 
@@ -104,23 +98,7 @@ function Item(props: {
   matchedTerms: string[];
   isRtl: boolean;
   onSelect: () => void;
-  onReport: () => void;
-  onToggleFavorite: () => Promise<boolean>;
 }): JSXElement {
-  const loggedOut = (): boolean => !isAuthenticated();
-  const [isFav, setIsFav] = createSignal(
-    // oxlint-disable-next-line solid/reactivity -- intentionally reading once as initial value
-    !loggedOut() && QuotesController.isQuoteFavorite(props.quote),
-  );
-
-  const handleToggleFavorite = async (): Promise<void> => {
-    setIsFav((v) => !v);
-    const success = await props.onToggleFavorite();
-    if (!success) {
-      setIsFav((v) => !v);
-    }
-  };
-
   return (
     <div
       class="grid cursor-pointer gap-2 rounded p-4 transition-[background-color] duration-125 select-none hover:bg-sub-alt"
@@ -163,37 +141,6 @@ function Item(props: {
               )}
             ></span>
           </div>
-          <Show when={!loggedOut()}>
-            <div class="flex shrink">
-              <Button
-                variant="text"
-                fa={{ icon: "fa-flag" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  props.onReport();
-                }}
-                balloon={{
-                  text: "Report quote",
-                  position: props.isRtl ? "right" : "left",
-                }}
-              />
-              <Button
-                variant="text"
-                fa={{
-                  icon: "fa-heart",
-                  variant: isFav() ? "solid" : "regular",
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  void handleToggleFavorite();
-                }}
-                balloon={{
-                  text: "Favorite quote",
-                  position: props.isRtl ? "right" : "left",
-                }}
-              />
-            </div>
-          </Show>
         </div>
       </div>
     </div>
@@ -209,7 +156,6 @@ export function QuoteSearchModal(): JSXElement {
 
   const [currentPage, setCurrentPage] = createSignal(1);
   const [lengthFilter, setLengthFilter] = createSignal<string[]>([]);
-  const [showFavoritesOnly, setShowFavoritesOnly] = createSignal(false);
   const [customFilterMin, setCustomFilterMin] = createSignal(0);
   const [customFilterMax, setCustomFilterMax] = createSignal(0);
   const [hasCustomFilter, setHasCustomFilter] = createSignal(false);
@@ -219,7 +165,6 @@ export function QuoteSearchModal(): JSXElement {
     matchedTerms: string[];
   }>({ quotes: [], matchedTerms: [] });
   const [isRtl, setIsRtl] = createSignal(false);
-  const [trackFavorites, refreshFavorites] = createTrigger();
 
   const [searchText, setSearchText] = createSignal("");
   createDebouncedEffectOn(
@@ -233,14 +178,6 @@ export function QuoteSearchModal(): JSXElement {
   );
 
   const isOpen = (): boolean => isModalOpen("QuoteSearch");
-
-  const isQuoteMod = (): boolean => {
-    const quoteMod = DB.getSnapshot()?.quoteMod;
-    return (
-      quoteMod !== undefined &&
-      (quoteMod === true || (quoteMod as string) !== "")
-    );
-  };
 
   const performSearch = (text: string): void => {
     const allQuotes = quotes();
@@ -302,8 +239,6 @@ export function QuoteSearchModal(): JSXElement {
   };
 
   const filteredQuotes = (): Quote[] => {
-    trackFavorites();
-
     let result = searchResults().quotes;
 
     const lengths = lengthFilter();
@@ -325,12 +260,6 @@ export function QuoteSearchModal(): JSXElement {
         }
         return false;
       });
-    }
-
-    if (showFavoritesOnly()) {
-      result = result.filter((quote) =>
-        QuotesController.isQuoteFavorite(quote),
-      );
     }
 
     return result;
@@ -386,7 +315,6 @@ export function QuoteSearchModal(): JSXElement {
     setSearchText("");
     setCurrentPage(1);
     setLengthFilter([]);
-    setShowFavoritesOnly(false);
     setHasCustomFilter(false);
   };
 
@@ -411,45 +339,6 @@ export function QuoteSearchModal(): JSXElement {
     hideModalAndClearChain("QuoteSearch");
   };
 
-  const toggleFavorite = async (quote: Quote): Promise<boolean> => {
-    const alreadyFavorited = QuotesController.isQuoteFavorite(quote);
-
-    try {
-      showLoaderBar();
-      await QuotesController.setQuoteFavorite(quote, !alreadyFavorited);
-      hideLoaderBar();
-      refreshFavorites();
-      return true;
-    } catch (e) {
-      hideLoaderBar();
-      showErrorNotification(
-        alreadyFavorited
-          ? "Failed to remove quote from favorites"
-          : "Failed to add quote to favorites",
-        { error: e },
-      );
-      return false;
-    }
-  };
-
-  const handleSubmitClick = async (): Promise<void> => {
-    showLoaderBar();
-    const getSubmissionEnabled = await Ape.quotes.isSubmissionEnabled();
-    const isEnabled =
-      (getSubmissionEnabled.status === 200 &&
-        getSubmissionEnabled.body.data?.isEnabled) ??
-      false;
-    hideLoaderBar();
-    if (!isEnabled) {
-      showNoticeNotification(
-        "Quote submission is disabled temporarily due to a large submission queue.",
-        { durationMs: 5000 },
-      );
-      return;
-    }
-    showModal("QuoteSubmit");
-  };
-
   return (
     <>
       <AnimatedModal
@@ -461,22 +350,6 @@ export function QuoteSearchModal(): JSXElement {
       >
         <div class="flex flex-col justify-between gap-2 sm:flex-row">
           <div class="text-2xl text-sub">Quote search</div>
-          <div class="grid gap-2">
-            <Show when={isAuthenticated()}>
-              <Button
-                fa={{ icon: "fa-plus" }}
-                text="Submit a quote"
-                onClick={() => void handleSubmitClick()}
-              />
-            </Show>
-            <Show when={isQuoteMod()}>
-              <Button
-                fa={{ icon: "fa-check" }}
-                text="Approve quotes"
-                onClick={() => showModal("QuoteApprove")}
-              />
-            </Show>
-          </div>
         </div>
         <div class="flex flex-col gap-4 sm:flex-row">
           <form.Field
@@ -517,14 +390,6 @@ export function QuoteSearchModal(): JSXElement {
               }}
             />
           </div>
-          <Show when={isAuthenticated()}>
-            <Button
-              variant="button"
-              fa={{ icon: "fa-heart", fixedWidth: true }}
-              active={showFavoritesOnly()}
-              onClick={() => setShowFavoritesOnly((v) => !v)}
-            />
-          </Show>
         </div>
         <div
           class="grid content-baseline gap-2 overflow-y-auto"
@@ -537,9 +402,6 @@ export function QuoteSearchModal(): JSXElement {
                 matchedTerms={searchResults().matchedTerms}
                 isRtl={isRtl()}
                 onSelect={() => applyQuote(quote.id)}
-                onReport={() => showQuoteReportModal(quote.id)}
-                // oxlint-disable-next-line solid/reactivity, typescript-eslint/promise-function-async -- fire-and-forget, no reactive tracking needed
-                onToggleFavorite={() => toggleFavorite(quote)}
               />
             )}
           </For>
@@ -572,8 +434,6 @@ export function QuoteSearchModal(): JSXElement {
           />
         </div>
       </AnimatedModal>
-      <QuoteSubmitModal />
-      <QuoteApproveModal />
     </>
   );
 }

@@ -18,14 +18,6 @@ export type CrownType =
   | "error"
   | "warning";
 
-export type ResultTag = {
-  id: string;
-  isPb: boolean;
-  balloon?: string;
-  // tag pb (wpm) to draw on the chart
-  chartPb?: number;
-};
-
 // facts about the finished test that are not part of the result object
 export type ResultDetails = {
   difficultyFailed: boolean;
@@ -41,11 +33,6 @@ export type ResultDetails = {
 
 type ResultState = {
   details: ResultDetails | null;
-  tags: ResultTag[];
-  // id of the saved result, empty until the server accepts it
-  resultId: string;
-  dailyLeaderboardRank?: number;
-  canRetrySaving: boolean;
   timeToday: string;
   crown: {
     visible: boolean;
@@ -57,9 +44,6 @@ type ResultState = {
 
 export const [resultState, setResultState] = createStore<ResultState>({
   details: null,
-  tags: [],
-  resultId: "",
-  canRetrySaving: false,
   timeToday: "",
   crown: {
     visible: false,
@@ -84,21 +68,6 @@ export function setCrownType(type: CrownType): void {
 
 export function hideCrown(): void {
   setResultState("crown", { visible: false, text: "", wide: false });
-}
-
-export function setResultTagsAfterEdit(
-  tagIds: string[],
-  tagPbIds: string[],
-): void {
-  setResultState("tags", (current) =>
-    tagIds.map(
-      (id) =>
-        current.find((t) => t.id === id) ?? {
-          id,
-          isPb: tagPbIds.includes(id),
-        },
-    ),
-  );
 }
 
 // smoothed burst (chart)

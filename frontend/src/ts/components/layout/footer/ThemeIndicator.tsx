@@ -1,31 +1,21 @@
 import { JSXElement, Show } from "solid-js";
 
-import { useCustomThemesLiveQuery } from "../../../collections/custom-themes";
 import { setConfig } from "../../../config/setters";
 import { Config } from "../../../config/store";
 import { showCommandline } from "../../../states/commandline";
-import { getThemeIndicator, isAuthenticated } from "../../../states/core";
-import { showNoticeNotification } from "../../../states/notifications";
+import { getThemeIndicator } from "../../../states/core";
 import { Fa } from "../../common/Fa";
 
 export function ThemeIndicator(): JSXElement {
-  const themes = useCustomThemesLiveQuery();
-
   const handleClick = (e: MouseEvent): void => {
     if (e.shiftKey) {
       if (Config.customTheme) {
         setConfig("customTheme", false);
         return;
       }
-      if (isAuthenticated() && themes().length < 1) {
-        showNoticeNotification("No custom themes!");
-        setConfig("customTheme", false);
-        return;
-      }
       setConfig("customTheme", true);
     } else {
-      const subgroup = Config.customTheme ? "customTheme" : "themes";
-      showCommandline({ subgroupOverride: subgroup });
+      showCommandline({ subgroupOverride: "themes" });
     }
   };
 

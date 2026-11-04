@@ -549,15 +549,6 @@ async function getQuoteWordList(
       throw new WordGenError(`Quote ${getSelectedQuoteId()} does not exist`);
     }
     rq = targetQuote;
-  } else if (Config.quoteLength.includes(-3)) {
-    const randomQuote = QuotesController.getRandomFavoriteQuote(
-      Config.language,
-    );
-    if (randomQuote === null) {
-      setQuoteLengthAll();
-      throw new WordGenError("No favorite quotes found");
-    }
-    rq = randomQuote;
   } else {
     const randomQuote = QuotesController.getRandomQuote();
     if (randomQuote === null) {

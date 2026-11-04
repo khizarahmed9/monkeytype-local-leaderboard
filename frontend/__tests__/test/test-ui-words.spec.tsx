@@ -6,10 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../../src/ts/controllers/theme-controller", () => ({
   randomizeTheme: vi.fn(),
 }));
-// uses matchMedia on import, which jsdom lacks
-vi.mock("../../src/ts/controllers/ad-controller", () => ({
-  destroyResult: vi.fn(),
-}));
 // funbox functions pull in test state, which fetches keyboard layouts on load
 vi.mock("../../src/ts/utils/json-data", async (importOriginal) => ({
   ...(await importOriginal()),

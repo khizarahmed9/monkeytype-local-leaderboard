@@ -4,8 +4,6 @@ import {
   getPrefersArabicLazyMode,
   setPrefersArabicLazyMode,
 } from "../states/lazy-mode";
-import { isOnline, showOfflineBanner } from "../states/connection";
-import Ape from "../ape";
 import { batch } from "solid-js";
 import * as TestUI from "./test-ui";
 import * as Strings from "../utils/strings";
@@ -22,25 +20,15 @@ import * as PractiseWords from "./practise-words";
 import * as Funbox from "./funbox/funbox";
 import * as PaceCaret from "./pace-caret";
 import * as TestTimer from "./test-timer";
-import * as DB from "../db";
 import * as Replay from "../components/pages/test/result/replay";
-import { __nonReactive } from "../collections/tags";
 import * as TodayTracker from "./today-tracker";
 import * as ChallengeContoller from "../controllers/challenge-controller";
-import { clearQuoteStats } from "../states/quote-rate";
-import {
-  getPbEligibility,
-  getResultTags,
-  showErrorCrownIfNeeded,
-  updateCrown,
-} from "./result-pb";
 import { showConfetti } from "../elements/confetti";
-import * as AdController from "../controllers/ad-controller";
 import * as Arrays from "../utils/arrays";
 import { getGlarsesMode } from "../states/glarses-mode";
 import { getSarcasticResultMessage } from "../states/sarcastic-result-message";
 import { closeResultWords, toggleResultWords } from "./words-history";
-import { getCustomTextIndicator, isAuthenticated } from "../states/core";
+import { getCustomTextIndicator } from "../states/core";
 import {
   setIsDirectionReversed,
   setIsLanguageRightToLeft,
@@ -90,9 +78,6 @@ import * as TestWords from "./test-words";
 import * as WordsGenerator from "./words-generator";
 import { canStartTest } from "./test-page-state";
 import { configEvent } from "../events/config";
-import objectHash from "object-hash";
-import * as AnalyticsController from "../controllers/analytics-controller";
-import { getAuthenticatedUser } from "../firebase";
 import { Mode } from "@monkeytype/schemas/shared";
 import {
   CompletedEvent,
@@ -107,10 +92,8 @@ import {
   isFunboxActiveWithProperty,
 } from "./funbox/list";
 import { getFunbox } from "@monkeytype/funbox";
-import { SnapshotResult } from "../constants/default-snapshot";
 import { WordGenError } from "../utils/word-gen-error";
 import { tryCatch } from "@monkeytype/util/trycatch";
-import * as Sentry from "../sentry";
 import { showLoaderBar, hideLoaderBar } from "../states/loader-bar";
 import { canQuickRestart } from "../utils/quick-restart";
 import {
@@ -122,7 +105,6 @@ import {
 } from "../states/result";
 import { blurInputElement, setInputElementValue } from "../input/input-element";
 import { debounce } from "throttle-debounce";
-import { setAccountButtonSpinner } from "../states/header";
 import { Config } from "../config/store";
 import { setQuoteLengthAll, toggleFunbox, setConfig } from "../config/setters";
 import {
@@ -162,12 +144,6 @@ let failReason = "";
 
 export function startTest(now: number): boolean {
   if (!canStartTest()) return false;
-
-  if (isAuthenticated()) {
-    void AnalyticsController.log("testStarted");
-  } else {
-    void AnalyticsController.log("testStartedNoLogin");
-  }
 
   setTestActive(true);
   TestTimer.clear();
@@ -213,7 +189,6 @@ function resetTestState(): void {
   setBailedOut(false);
   PaceCaret.reset();
   setKoreanStatus(false);
-  clearQuoteStats();
   setComposing(false);
   setCompositionData("");
   Strings.clearWordDirectionCache();
@@ -411,7 +386,6 @@ async function init(): Promise<boolean> {
   testReinitCount++;
   if (testReinitCount > 3) {
     if (lastInitError) {
-      void Sentry.captureException(lastInitError);
       setTestInitError(`${lastInitError.name}: ${lastInitError.message}`);
     }
     setTestInitFailed(true);
@@ -442,7 +416,7 @@ async function init(): Promise<boolean> {
   }
 
   if (Config.mode === "quote") {
-    if (Config.quoteLength.includes(-3) && !isAuthenticated()) {
+    if (Config.quoteLength.includes(-3)) {
       setQuoteLengthAll();
     }
   }
@@ -715,41 +689,8 @@ export async function addWord(): Promise<void> {
   }
 }
 
-let retrySavingEvent: CompletedEvent | null = null;
-
-export async function retrySavingResult(): Promise<void> {
-  const completedEvent = retrySavingEvent;
-
-  if (completedEvent === null) {
-    showNoticeNotification(
-      "Could not retry saving the result as the result no longer exists.",
-      {
-        durationMs: 5000,
-        important: true,
-      },
-    );
-
-    return;
-  }
-
-  if (!resultState.canRetrySaving) {
-    return;
-  }
-
-  setResultState("canRetrySaving", false);
-
-  showNoticeNotification("Retrying to save...");
-
-  await saveResult(completedEvent, true);
-}
-
 function buildCompletedEvent(eventLog: EventLog): CompletedResult {
   const chars = getChars(eventLog);
-
-  //tags
-  const activeTagsIds: string[] = __nonReactive
-    .getActiveTags()
-    .map((tag) => tag._id);
 
   let language = Config.language;
   if (Config.mode === "quote") {
@@ -822,7 +763,7 @@ function buildCompletedEvent(eventLog: EventLog): CompletedResult {
     afkDuration: afkDuration,
     quoteLength: currentQuote?.group ?? -1,
     customText: customText,
-    tags: activeTagsIds,
+    tags: [],
     punctuation: Config.punctuation,
     numbers: Config.numbers,
     lazyMode: Config.lazyMode,
@@ -1008,10 +949,8 @@ export async function finish(difficultyFailed = false): Promise<void> {
     setIsTestInvalid(true);
     dontSave = true;
   } else if (
-    (!DB.getSnapshot()?.lbOptOut &&
-      (completedEvent.acc < 75 || completedEvent.acc > 100)) ||
-    (DB.getSnapshot()?.lbOptOut === true &&
-      (completedEvent.acc < 50 || completedEvent.acc > 100))
+    completedEvent.acc < 75 ||
+    completedEvent.acc > 100
   ) {
     showNoticeNotification("Test invalid - accuracy");
     setIsTestInvalid(true);
@@ -1084,39 +1023,7 @@ export async function finish(difficultyFailed = false): Promise<void> {
   );
   setResultState("timeToday", TodayTracker.getString());
 
-  let savingResultPromise: ReturnType<typeof saveResult> =
-    Promise.resolve(null);
-  const user = getAuthenticatedUser();
-  if (user !== null) {
-    // logged in
-    if (dontSave) {
-      void AnalyticsController.log("testCompletedInvalid");
-    } else {
-      resetIncompleteTests();
-
-      if (!completedEvent.bailedOut) {
-        const challenge = ChallengeContoller.verify(completedEvent);
-        if (challenge !== null) completedEvent.challenge = challenge;
-      }
-
-      completedEvent.uid = user.uid;
-
-      savingResultPromise = saveResult(completedEvent, false);
-      void savingResultPromise.then((response) => {
-        if (response?.status === 200) {
-          void AnalyticsController.log("testCompleted");
-        }
-      });
-    }
-  } else {
-    // logged out
-    void AnalyticsController.log("testCompletedNoLogin");
-    if (!dontSave) {
-      // if its valid save it for later
-      setLastSignedOutResult(completedEvent);
-    }
-    dontSave = true;
-  }
+  // GAME: submit result here
 
   const resultUpdatePromise = showResult(completedEvent, dontSave, {
     difficultyFailed,
@@ -1130,7 +1037,7 @@ export async function finish(difficultyFailed = false): Promise<void> {
     quote: Config.mode === "quote" ? getCurrentQuote() : null,
   });
 
-  await Promise.all([savingResultPromise, resultUpdatePromise]);
+  await resultUpdatePromise;
 }
 
 const sarcasticMessages = [
@@ -1155,19 +1062,7 @@ async function showResult(
   Replay.resetReplay();
   blurInputElement();
 
-  if (!isOnline()) {
-    showOfflineBanner();
-  }
-
-  const pbEligibility = getPbEligibility(result, dontSave);
-  updateCrown(result, pbEligibility);
-  setResultState({
-    details,
-    tags: getResultTags(result, pbEligibility),
-    resultId: "",
-    dailyLeaderboardRank: undefined,
-    canRetrySaving: false,
-  });
+  setResultState({ details });
 
   if (getGlarsesMode()) {
     console.log(
@@ -1214,127 +1109,9 @@ async function showResult(
   setResultLoading(false);
   setResultShown(true);
 
-  void AdController.renderResult();
   setResultCalculating(false);
   // the result is shown: free the test words DOM
   resetWordsRender();
-}
-
-async function saveResult(
-  completedEvent: CompletedEvent,
-  isRetrying: boolean,
-): Promise<null | Awaited<ReturnType<typeof Ape.results.add>>> {
-  if (!Config.resultSaving) {
-    showErrorNotification("Result not saved: disabled by user", {
-      durationMs: 3000,
-      customTitle: "Notice",
-      important: true,
-    });
-    return null;
-  }
-
-  const result = structuredClone(completedEvent);
-
-  if (result.testDuration > 122) {
-    result.chartData = "toolong";
-    result.keySpacing = "toolong";
-    result.keyDuration = "toolong";
-  }
-  //@ts-expect-error just in case this is repeated and already has a hash
-  delete result.hash;
-  result.hash = objectHash(result);
-
-  setAccountButtonSpinner(true);
-
-  const response = await Ape.results.add({ body: { result } });
-
-  setAccountButtonSpinner(false);
-
-  if (response.status !== 200) {
-    //only allow retry if status is not in this list
-    if (![460, 461, 463, 464, 465, 466].includes(response.status)) {
-      setResultState("canRetrySaving", true);
-      if (!isRetrying) {
-        retrySavingEvent = result;
-      }
-    }
-    console.log("Error saving result", result);
-    if (response.body.message === "Old key data format") {
-      response.body.message =
-        "Old key data format. Please refresh the page to download the new update. If the problem persists, please contact support.";
-    }
-    if (
-      /"result\..+" is (not allowed|required)/gi.test(response.body.message)
-    ) {
-      response.body.message =
-        "Looks like your result data is using an incorrect schema. Please refresh the page to download the new update. If the problem persists, please contact support.";
-    }
-    showErrorNotification("Failed to save result", { response });
-    return response;
-  }
-
-  const data = response.body.data;
-  setResultState("resultId", data.insertedId);
-
-  const localDataToSave: DB.SaveLocalResultData = {};
-
-  if (data.xp !== undefined) {
-    localDataToSave.xp = data.xp;
-    if (isTestFinished()) {
-      localDataToSave.xpBreakdown = data.xpBreakdown;
-    }
-  }
-
-  if (data.streak !== undefined) {
-    localDataToSave.streak = data.streak;
-  }
-
-  if (data.insertedId !== undefined) {
-    //TODO - this type cast was not needed before because we were using JSON cloning
-    // but now with the stronger types it shows that we are forcing completed event
-    // into a snapshot result - might not cuase issues but worth investigating
-    const snapshotResult = structuredClone(
-      result,
-    ) as unknown as SnapshotResult<Mode>;
-    snapshotResult._id = data.insertedId;
-    if (data.isPb !== undefined && data.isPb) {
-      snapshotResult.isPb = true;
-    }
-    localDataToSave.result = snapshotResult;
-  }
-
-  if (data.isPb !== undefined && data.isPb) {
-    //new pb
-    const localPb = DB.getLocalPB(
-      result.mode,
-      result.mode2,
-      result.punctuation,
-      result.numbers,
-      result.language,
-      result.difficulty,
-      result.lazyMode,
-      getFunbox(result.funbox),
-    );
-
-    if (localPb !== undefined) {
-      showConfetti();
-    }
-    setCrownType("normal");
-
-    localDataToSave.isPb = true;
-  } else {
-    showErrorCrownIfNeeded();
-  }
-
-  setResultState({
-    dailyLeaderboardRank: data.dailyLeaderboardRank,
-    canRetrySaving: false,
-  });
-  if (isRetrying) {
-    showSuccessNotification("Result saved", { important: true });
-  }
-  DB.saveLocalResult(localDataToSave);
-  return response;
 }
 
 export function fail(reason: string): void {
@@ -1358,7 +1135,7 @@ const debouncedZipfCheck = debounce(250, async () => {
     showNoticeNotification(
       `${Strings.capitalizeFirstLetter(
         Strings.getLanguageDisplayString(Config.language),
-      )} may not support Zipf funbox, because we don't know if it's ordered by frequency or not. If you would like to add this label, please contact us.`,
+      )} may not support Zipf funbox, because we don't know if it's ordered by frequency or not.`,
       {
         durationMs: 7000,
       },

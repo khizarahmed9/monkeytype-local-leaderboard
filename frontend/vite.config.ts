@@ -22,7 +22,6 @@ import { injectPreload } from "./vite-plugins/inject-preload";
 import Inspect from "vite-plugin-inspect";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import { VitePWA } from "vite-plugin-pwa";
-import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { KnownFontName } from "@monkeytype/schemas/fonts";
 import solidPlugin from "vite-plugin-solid";
 import devtools from "solid-devtools/vite";
@@ -88,17 +87,13 @@ function sassList(values) {
 
 function getPlugins({
   isDevelopment,
-  env,
-  useSentry,
 }: {
   isDevelopment: boolean;
-  env: Record<string, string>;
-  useSentry: boolean;
 }): PluginOption[] {
   const clientVersion = getClientVersion(isDevelopment);
 
   const plugins: PluginOption[] = [
-    envConfig({ isDevelopment, clientVersion, env }),
+    envConfig({ isDevelopment, clientVersion }),
     languageHashes({ skip: isDevelopment }),
     injectHTML() as PluginOption,
     tailwindcss(),
@@ -159,7 +154,7 @@ function getPlugins({
         runtimeCaching: [
           {
             urlPattern: (options) => {
-              const isApi = options.url.hostname === "api.monkeytype.com";
+              const isApi = options.url.pathname.startsWith("/api/");
               return options.sameOrigin && !isApi;
             },
             handler: "NetworkFirst",
@@ -176,17 +171,6 @@ function getPlugins({
         ],
       },
     }),
-    useSentry
-      ? sentryVitePlugin({
-          authToken: env["SENTRY_AUTH_TOKEN"],
-          org: "monkeytype",
-          project: "frontend",
-          release: {
-            name: clientVersion,
-          },
-          applicationKey: "monkeytype-frontend",
-        })
-      : null,
     injectPreload(),
     minifyJson(),
   ];
@@ -196,23 +180,14 @@ function getPlugins({
   );
 }
 
-function getBuildOptions({
-  enableSourceMaps,
-}: {
-  enableSourceMaps: boolean;
-}): BuildEnvironmentOptions {
+function getBuildOptions(): BuildEnvironmentOptions {
   return {
-    sourcemap: enableSourceMaps,
     emptyOutDir: true,
     outDir: "../dist",
     assetsInlineLimit: 0, //dont inline small files as data
     rolldownOptions: {
       input: {
         monkeytype: path.resolve(__dirname, "src/index.html"),
-        email: path.resolve(__dirname, "src/email-handler.html"),
-        privacy: path.resolve(__dirname, "src/privacy-policy.html"),
-        security: path.resolve(__dirname, "src/security-policy.html"),
-        terms: path.resolve(__dirname, "src/terms-of-service.html"),
         404: path.resolve(__dirname, "src/404.html"),
       },
       output: {
@@ -244,14 +219,6 @@ function getBuildOptions({
         entryFileNames: "js/[name].[hash].js",
         codeSplitting: {
           groups: [
-            {
-              name: "vendor-sentry",
-              test: /node_modules\/@sentry\//,
-            },
-            {
-              name: "vendor-firebase",
-              test: /node_modules\/@firebase\//,
-            },
             {
               name: "vendor-tanstack",
               test: /node_modules\/@tanstack\//,
@@ -329,21 +296,11 @@ function getCssOptions({
 
 export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), "");
-  const useSentry = env["SENTRY"] !== undefined;
   const isDevelopment = mode !== "production";
 
-  if (!isDevelopment) {
-    if (env["RECAPTCHA_SITE_KEY"] === undefined) {
-      throw new Error(`${mode}: RECAPTCHA_SITE_KEY is not defined`);
-    }
-    if (useSentry && env["SENTRY_AUTH_TOKEN"] === undefined) {
-      throw new Error(`${mode}: SENTRY_AUTH_TOKEN is not defined`);
-    }
-  }
-
   return {
-    plugins: getPlugins({ isDevelopment, useSentry: useSentry, env }),
-    build: getBuildOptions({ enableSourceMaps: useSentry }),
+    plugins: getPlugins({ isDevelopment }),
+    build: getBuildOptions(),
     css: getCssOptions({ isDevelopment }),
     server: {
       open: env["SERVER_OPEN"] !== "false",
@@ -351,17 +308,7 @@ export default defineConfig(({ mode }): UserConfig => {
       host: env["BACKEND_URL"] !== undefined,
     },
     resolve: {
-      alias: [
-        ...workspacePackagesAlias,
-        ...(isDevelopment
-          ? []
-          : [
-              {
-                find: /\/constants\/firebase-config$/,
-                replacement: "/constants/firebase-config-live",
-              },
-            ]),
-      ],
+      alias: workspacePackagesAlias,
     },
     clearScreen: false,
     root: "src",

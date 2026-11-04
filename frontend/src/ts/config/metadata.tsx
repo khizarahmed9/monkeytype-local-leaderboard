@@ -5,10 +5,8 @@ import { roundTo1 } from "@monkeytype/util/numbers";
 import { typedKeys } from "@monkeytype/util/objects";
 import { JSXElement } from "solid-js";
 
-import * as CustomThemes from "../collections/custom-themes";
 import { getDefaultConfig } from "../constants/default-config";
 import { Fonts } from "../constants/fonts";
-import { isAuthenticated } from "../states/core";
 import { showNoticeNotification } from "../states/notifications";
 import { FaObject } from "../types/font-awesome";
 import { Validation } from "../types/validation";
@@ -350,14 +348,8 @@ const configMetadataEntries = {
     commandline: {
       alias: "quotes",
       subgroup: {
-        options: [[0, 1, 2, 3], [0], [1], [2], [3], [-3]],
+        options: [[0, 1, 2, 3], [0], [1], [2], [3]],
         configValueMode: () => "include",
-        isAvailable: (value) => {
-          if (value[0] === -3) {
-            return isAuthenticated;
-          }
-          return undefined;
-        },
         display: (value) => {
           if (areUnsortedArraysEqual(value, [0, 1, 2, 3])) {
             return "all";
@@ -1071,7 +1063,7 @@ const configMetadataEntries = {
     changeRequiresRestart: false,
     group: "caret",
     description:
-      "Displays a second caret that moves at constant speed. The 'average' option averages the speed of last 10 results. The 'tag pb' option takes the highest PB of any active tag. The 'daily' option takes the highest speed of the last 24 hours.",
+      "Displays a second caret that moves at constant speed.",
     optionsMetadata: {
       tagPb: {
         displayString: "tag pb",
@@ -1084,19 +1076,11 @@ const configMetadataEntries = {
       pb: {},
     },
     isBlocked: ({ value }) => {
-      if (document.readyState === "complete") {
-        if ((value === "pb" || value === "tagPb") && !isAuthenticated()) {
-          showNoticeNotification(
-            `Pace caret "pb" and "tag pb" are unavailable without an account`,
-          );
-          return true;
-        }
-      }
-      return false;
+      return ["pb", "tagPb", "average", "daily"].includes(value);
     },
     commandline: {
       subgroup: {
-        options: ["off", "pb", "tagPb", "last", "average", "daily"],
+        options: ["off", "last"],
       },
       input: {
         secondKey: "paceCaretCustomSpeed",
@@ -1680,7 +1664,7 @@ const configMetadataEntries = {
     displayString: "random theme",
     group: "theme",
     description:
-      "After completing a test, the theme will be set to a random one. The random themes are not saved to your config. If set to 'favorite' only favorite themes will be randomized. If set to 'light' or 'dark', only presets with light or dark background colors will be randomized, respectively. If set to 'auto' dark or light themes are used, depending on your system theme. If set to 'custom', custom themes will be randomized.",
+      "After completing a test, the theme will be set to a random one. The random themes are not saved to your config. If set to 'favorite' only favorite themes will be randomized. If set to 'light' or 'dark', only presets with light or dark background colors will be randomized, respectively. If set to 'auto' dark or light themes are used, depending on your system theme.",
     optionsMetadata: {
       fav: {
         displayString: "favorite",
@@ -1693,27 +1677,11 @@ const configMetadataEntries = {
       on: {},
     },
     isBlocked: ({ value }) => {
-      if (value === "custom") {
-        if (!isAuthenticated()) {
-          showNoticeNotification(
-            "Random theme 'custom' is unavailable without an account",
-          );
-          return true;
-        }
-        if (CustomThemes.__nonReactive.getCustomThemes().length === 0) {
-          showNoticeNotification(
-            "Random theme 'custom' requires at least one custom theme to be saved",
-          );
-          return true;
-        }
-      }
-      return false;
+      return value === "custom";
     },
     commandline: {
       subgroup: {
-        options: "fromSchema",
-        isAvailable: (value) =>
-          value === "custom" ? isAuthenticated : undefined,
+        options: ["off", "on", "fav", "light", "dark", "auto"],
       },
     },
   },

@@ -9,7 +9,6 @@ import {
   previewError,
 } from "../../../controllers/sound-controller";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
-import { isAuthenticated } from "../../../states/core";
 import { showModal } from "../../../states/modals";
 import { isSettingsSearchActive } from "../../../states/settings-search";
 import { showSimpleModal } from "../../../states/simple-modal";
@@ -17,7 +16,6 @@ import { isCustomBackgroundLoaded } from "../../../states/theme";
 import { cn } from "../../../utils/cn";
 import fileStorage from "../../../utils/file-storage";
 import { wordsToCamelCase } from "../../../utils/strings";
-import { Advertisement } from "../../common/Advertisement";
 import { Anime, AnimeShow } from "../../common/anime";
 import { Button } from "../../common/Button";
 import { Fa } from "../../common/Fa";
@@ -39,9 +37,7 @@ import { MinAcc } from "./custom-setting/MinAcc";
 import { MinBurst } from "./custom-setting/MinBurst";
 import { MinSpeed } from "./custom-setting/MinSpeed";
 import { PaceCaret } from "./custom-setting/PaceCaret";
-import { Presets } from "./custom-setting/Presets";
 import { SoundVolume } from "./custom-setting/SoundVolume";
-import { Tags } from "./custom-setting/Tags";
 import { Theme } from "./custom-setting/Theme";
 import { QuickNav } from "./QuickNav";
 import { SearchableAutoSetting } from "./SearchableAutoSetting";
@@ -66,16 +62,10 @@ export function SettingsPage(): JSXElement {
           <br />( <CommandlineHotkey /> )
         </div>
       </Show>
-      <AccountSettingsNotice />
       <SettingsSearch />
       {/* while filtering, lay the matching sections out with a uniform gap */}
       <div class={cn(isSettingsSearchActive() && "grid gap-8")}>
         <Section title="behavior">
-          <Show when={isAuthenticated()}>
-            <Tags />
-            <Presets />
-            <SearchableAutoSetting key="resultSaving" />
-          </Show>
           <SearchableAutoSetting key="difficulty" />
           <SearchableAutoSetting key="quickRestart" />
           <SearchableAutoSetting key="repeatQuotes" />
@@ -106,7 +96,6 @@ export function SettingsPage(): JSXElement {
           <Layout />
           <SearchableAutoSetting key="codeUnindentOnBackspace" />
         </Section>
-        <Advertisement id="ad-settings-1" visible="sellout" />
         <Section title="sound">
           <SoundVolume />
           <SearchableAutoSetting
@@ -141,7 +130,6 @@ export function SettingsPage(): JSXElement {
           <SearchableAutoSetting key="repeatedPace" />
           <SearchableAutoSetting key="paceCaretStyle" wide />
         </Section>
-        <Advertisement id="ad-settings-2" visible="sellout" />
         <Section title="appearance">
           <SearchableAutoSetting key="timerStyle" wide />
           <SearchableAutoSetting key="liveSpeedStyle" />
@@ -181,34 +169,13 @@ export function SettingsPage(): JSXElement {
           <SearchableAutoSetting key="randomTheme" wide />
           <Theme />
         </Section>
-        <Advertisement id="ad-settings-3" visible="sellout" />
         <Section title="hide elements">
           <SearchableAutoSetting key="showKeyTips" />
           <SearchableAutoSetting key="showOutOfFocusWarning" />
           <SearchableAutoSetting key="capsLockWarning" />
-          <SearchableAutoSetting key="showAverage" />
-          <SearchableAutoSetting key="ads" />
         </Section>
         <Section title="danger zone">
           <ImportExport />
-          <SearchableSetting
-            key="cookies"
-            title="update cookie preferences"
-            description="If you changed your mind about which cookies you consent to, you can change your preferences here."
-            fa={{
-              icon: "fa-cookie-bite",
-            }}
-            inputs={
-              <Button
-                class="w-full"
-                onClick={() => {
-                  showModal("Cookies");
-                }}
-              >
-                open
-              </Button>
-            }
-          />
           <SearchableSetting
             key="theRest"
             title="the rest"
@@ -268,41 +235,7 @@ export function SettingsPage(): JSXElement {
         </Section>
       </div>
 
-      <AccountSettingsNotice />
     </div>
-  );
-}
-
-function AccountSettingsNotice(): JSXElement {
-  const [dismissed, setDismissed] = useLocalStorage({
-    key: "accountSettingsMessageDismissed",
-    schema: z.boolean(),
-    fallback: false,
-  });
-  return (
-    <Show when={!dismissed()}>
-      <div
-        class={cn(
-          "grid grid-cols-[auto_1fr] items-center gap-4 rounded px-4 py-4 ring-4 ring-sub-alt md:grid-cols-[auto_1fr_auto] md:gap-8",
-          isSettingsSearchActive() && "hidden",
-        )}
-      >
-        <Fa icon="fa-user-cog" class="text-4xl text-sub" />
-        <div>
-          Account settings have moved. You can now access them by hovering over
-          the account button in the top right corner, then clicking
-          &quot;Account settings&quot;.
-        </div>
-        <Button
-          text="go to account settings"
-          to="/account-settings"
-          class="col-span-2 p-4 md:col-span-1"
-          onClick={() => {
-            setDismissed(true);
-          }}
-        />
-      </div>
-    </Show>
   );
 }
 

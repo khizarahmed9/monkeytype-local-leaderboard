@@ -5,7 +5,7 @@ import { setConfig, setQuoteLengthAll } from "../../../config/setters";
 import { getConfig } from "../../../config/store";
 import { createEffectOn } from "../../../hooks/effects";
 import { useRefWithUtils } from "../../../hooks/useRefWithUtils";
-import { isAuthenticated } from "../../../states/core";
+import { } from "../../../states/core";
 import { showModal } from "../../../states/modals";
 import {
   isTestFinished,
@@ -335,18 +335,6 @@ function Mode2Quote(props: ComponentProps<"div">): JSXElement {
           />
         )}
       </For>
-      <Show when={isAuthenticated()}>
-        <TCButton
-          fa={{
-            icon: "fa-heart",
-          }}
-          active={areUnsortedArraysEqual(getConfig.quoteLength, [-3])}
-          onClick={() => {
-            setConfig("quoteLength", [-3]);
-            void restartTest();
-          }}
-        />
-      </Show>
       <TCButton
         fa={{
           icon: "fa-search",

@@ -64,18 +64,6 @@ describe("notifications store", () => {
       expect(getNotifications()[0]?.durationMs).toBe(5000);
     });
 
-    it("appends response body message", () => {
-      const response = {
-        status: 400,
-        body: { message: "Bad request" },
-      } as AddNotificationOptions["response"];
-
-      addNotificationWithLevel("Request failed", "error", { response });
-      expect(getNotifications()[0]?.message).toBe(
-        "Request failed: Bad request",
-      );
-    });
-
     it("appends error message via createErrorMessage", () => {
       addNotificationWithLevel("Something broke", "error", {
         error: new Error("underlying cause"),

@@ -1,7 +1,6 @@
 import type { Config as ConfigSchema } from "@monkeytype/schemas/configs";
 import { configMetadata } from "./metadata";
 import { getDefaultConfig } from "../constants/default-config";
-import { resetPendingConfigSync } from "./persistence";
 import { Config, setFullConfigStore } from "./store";
 
 export const __testing = {
@@ -13,7 +12,6 @@ export const __testing = {
     }
     Object.assign(Config, newConfig);
     setFullConfigStore(newConfig);
-    resetPendingConfigSync({});
   },
   getConfig: () => Config,
 };

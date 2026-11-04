@@ -1,15 +1,11 @@
 import MinBurstCommands from "./lists/min-burst";
 import BailOutCommands from "./lists/bail-out";
-import QuoteFavoriteCommands from "./lists/quote-favorites";
 import NavigationCommands from "./lists/navigation";
 import ResultScreenCommands from "./lists/result-screen";
 import CustomBackgroundCommands from "./lists/custom-background";
 import FontFamilyCommands from "./lists/font-family";
 import CustomBackgroundFilterCommands from "./lists/background-filter";
 import AddOrRemoveThemeToFavorite from "./lists/add-or-remove-theme-to-favorites";
-import TagsCommands from "./lists/tags";
-import CustomThemesListCommands from "./lists/custom-themes-list";
-import PresetsCommands from "./lists/presets";
 import FunboxCommands from "./lists/funbox";
 import ThemesCommands from "./lists/themes";
 import LoadChallengeCommands from "./lists/load-challenge";
@@ -26,8 +22,6 @@ import {
 import { Command, CommandlineListKey, CommandsSubgroup } from "./types";
 import { buildCommandForConfigKey } from "./util";
 import { CommandlineConfigKey } from "../config/metadata";
-import { isAuthAvailable, signOut } from "../firebase";
-import { isAuthenticated } from "../states/core";
 import { ConfigKey } from "@monkeytype/schemas/configs";
 import {
   hideFpsCounter,
@@ -36,8 +30,6 @@ import {
 import { applyConfigFromJson } from "../config/lifecycle";
 import { fixSkillIssue } from "../components/layout/overlays/SkillIssueFix";
 import { getLastEventLog } from "../states/test";
-
-const adsCommands = buildCommands("ads");
 
 export const commands: CommandsSubgroup = {
   title: "",
@@ -73,7 +65,6 @@ export const commands: CommandsSubgroup = {
       },
       shouldFocusTestUI: false,
     },
-    ...QuoteFavoriteCommands,
     ...BailOutCommands,
     {
       id: "shareTestSettings",
@@ -84,13 +75,8 @@ export const commands: CommandsSubgroup = {
       },
     },
 
-    //account
-    ...TagsCommands,
-    ...PresetsCommands,
-
     //behavior
     ...buildCommands(
-      "resultSaving",
       "difficulty",
       "quickRestart",
       "repeatQuotes",
@@ -175,7 +161,6 @@ export const commands: CommandsSubgroup = {
       ...ThemesCommands,
       "customTheme",
 
-      ...CustomThemesListCommands,
       "flipTestColors",
       "colorfulMode",
       ...AddOrRemoveThemeToFavorite,
@@ -200,14 +185,11 @@ export const commands: CommandsSubgroup = {
       "showKeyTips",
       "showOutOfFocusWarning",
       "capsLockWarning",
-      "showAverage",
-      "showPb",
       "monkeyPowerLevel",
       "monkey",
     ),
 
     //danger zone
-    ...adsCommands,
 
     //other
     ...LoadChallengeCommands,
@@ -318,25 +300,6 @@ export const commands: CommandsSubgroup = {
         fixSkillIssue();
       },
     },
-    {
-      id: "joinDiscord",
-      display: "Join the Discord server",
-      fa: { icon: "fa-users" },
-      exec: (): void => {
-        window.open("https://discord.gg/monkeytype");
-      },
-    },
-    {
-      id: "signOut",
-      display: "Sign out",
-      fa: { icon: "fa-sign-out-alt" },
-      exec: (): void => {
-        void signOut();
-      },
-      available: () => {
-        return isAuthAvailable() && isAuthenticated();
-      },
-    },
   ],
 };
 
@@ -345,8 +308,6 @@ const lists: Record<CommandlineListKey, CommandsSubgroup | undefined> = {
   loadChallenge: LoadChallengeCommands[0]?.subgroup,
   minBurst: MinBurstCommands[0]?.subgroup,
   funbox: FunboxCommands[0]?.subgroup,
-  tags: TagsCommands[0]?.subgroup,
-  ads: adsCommands[0]?.subgroup,
 };
 
 const subgroupByConfigKey = Object.fromEntries(

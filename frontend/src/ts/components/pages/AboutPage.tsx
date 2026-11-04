@@ -1,178 +1,23 @@
-import { useQuery } from "@tanstack/solid-query";
-import { For, JSXElement } from "solid-js";
+import { JSXElement } from "solid-js";
 
-import {
-  getContributorsQueryOptions,
-  getSpeedHistogramQueryOptions,
-  getSupportersQueryOptions,
-  getTypingStatsQueryOptions,
-} from "../../queries/public";
-import { showModal } from "../../states/modals";
-import { getTheme } from "../../states/theme";
-import { getNumberWithMagnitude } from "../../utils/numbers";
-import { Advertisement } from "../common/Advertisement";
-import AsyncContent from "../common/AsyncContent";
 import { Button } from "../common/Button";
-import { ChartJs } from "../common/ChartJs";
 import { H2, H3 } from "../common/Headers";
 import { CommandlineHotkey } from "../hotkeys/CommandlineHotkey";
 import { QuickRestartHotkey } from "../hotkeys/QuickRestartHotkey";
 
 export function AboutPage(): JSXElement {
-  const contributors = useQuery(() => getContributorsQueryOptions());
-
-  const supporters = useQuery(() => getSupportersQueryOptions());
-
-  const typingStats = useQuery(() => getTypingStatsQueryOptions());
-
-  const speedHistogram = useQuery(() => getSpeedHistogramQueryOptions());
-
-  const numberOfHistogramRecords = (data?: { y: number }[]) => {
-    if (data === undefined) return "";
-    const sum = getNumberWithMagnitude(
-      data.reduce((sum, it) => (sum += it.y), 0),
-    );
-    return `${sum.roundedTo2} ${sum.orderOfMagnitude}`;
-  };
-
   return (
     <div class="content-grid grid gap-8">
       <section class="text-center text-sub">
         Created with love by Miodec.
         <br />
-        <a href="#supporters_title">Supported</a> and{" "}
-        <a href="#contributors_title">expanded</a> by many awesome people.
-        <br />
         Launched on 15th of May, 2020.
-      </section>
-      <section>
-        <AsyncContent
-          alwaysShowContent
-          queries={{ typingStats }}
-          errorMessage="Failed to get global typing stats"
-        >
-          {({ typingStatsData }) => (
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <For
-                each={
-                  [
-                    [
-                      "total tests started",
-                      () => typingStatsData()?.testsStarted,
-                    ],
-                    ["total typing time", () => typingStatsData()?.timeTyping],
-                    [
-                      "total tests completed",
-                      () => typingStatsData()?.testsCompleted,
-                    ],
-                  ] as const
-                }
-              >
-                {([title, stat]) => (
-                  <div class="text-center">
-                    <div class="text-sub">{title}</div>
-                    <div class="text-5xl">{stat()?.text ?? "-"}</div>
-                    <div class="text-xl">{stat()?.subText ?? "-"}</div>
-                  </div>
-                )}
-              </For>
-            </div>
-          )}
-        </AsyncContent>
-      </section>
-      <section class="h-48 w-full">
-        <AsyncContent
-          alwaysShowContent
-          queries={{ speedHistogram }}
-          errorMessage="Failed to get global speed stats for histogram"
-        >
-          {({ speedHistogramData }) => (
-            <>
-              <ChartJs
-                name="SpeedHistogram"
-                type="bar"
-                data={{
-                  labels: speedHistogramData()?.labels ?? [],
-                  datasets: [
-                    {
-                      yAxisID: "count",
-                      label: "Users",
-                      data: speedHistogramData()?.data ?? [],
-                      minBarLength: 2,
-                      backgroundColor: getTheme().main,
-                      borderColor: getTheme().main,
-                    },
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  hover: {
-                    mode: "nearest",
-                    intersect: false,
-                  },
-                  scales: {
-                    x: {
-                      axis: "x",
-                      bounds: "ticks",
-                      display: true,
-                      title: {
-                        display: false,
-                        text: "Bucket",
-                      },
-                      offset: true,
-                    },
-                    count: {
-                      axis: "y",
-                      beginAtZero: true,
-                      min: 0,
-                      ticks: {
-                        autoSkip: true,
-                        autoSkipPadding: 20,
-                        stepSize: 10,
-                      },
-                      display: true,
-                      title: {
-                        display: true,
-                        text: "Users",
-                      },
-                    },
-                  },
-                  plugins: {
-                    annotation: {
-                      annotations: [],
-                    },
-                    tooltip: {
-                      animation: { duration: 250 },
-                      intersect: false,
-                      mode: "index",
-                      callbacks: {
-                        afterLabel: (context) => {
-                          return (
-                            (context.raw as { topPercentage?: string })
-                              .topPercentage ?? ""
-                          );
-                        },
-                      },
-                    },
-                  },
-                }}
-              />
-              <div class="text-right text-xs text-sub">
-                distribution of time 60 leaderboard results (wpm) <br />
-                {numberOfHistogramRecords(speedHistogramData()?.data)} total
-                results
-              </div>
-            </>
-          )}
-        </AsyncContent>
       </section>
       <section>
         <H2 fa={{ icon: "fa-info-circle" }} text="about" />
         <p>
           Monkeytype is a minimalistic and customizable typing test. It features
-          many test modes, an account system to save your typing speed history,
-          and user-configurable features such as themes, sounds, a smooth caret,
+          many test modes and user-configurable features such as themes, sounds, a smooth caret,
           and more. Monkeytype attempts to emulate the experience of natural
           keyboard typing during a typing test, by unobtrusively presenting the
           text prompts and displaying typed characters in-place, providing
@@ -232,12 +77,11 @@ export function AboutPage(): JSXElement {
           </dd>
         </dl>
       </section>
-      <Advertisement id="ad-about-1" visible="sellout" />
       <section>
         <H3 fa={{ icon: "fa-chart-area" }} text="results screen" />
         <p>
           After completing a test you will be able to see your wpm, raw wpm,
-          accuracy, character stats, test length, leaderboards info and test
+          accuracy, character stats, test length and test
           info (you can hover over some values to get floating point numbers).
           You can also see a graph of your wpm and raw over the duration of the
           test. Remember that the wpm line is a global average, while the raw
@@ -245,67 +89,6 @@ export function AboutPage(): JSXElement {
           is 0).
         </p>
       </section>
-      <section>
-        <H3 fa={{ icon: "fa-bug" }} text="bug report or feature request" />
-        <p>
-          If you encounter a bug, or have a feature request - join the Discord
-          server, send me an email, a direct message on Twitter or create an
-          issue on GitHub.
-        </p>
-      </section>
-      <div></div>
-      <section>
-        <H2 fa={{ icon: "fa-life-ring" }} text="support" />
-        <p>
-          Thanks to everyone who has supported this project. It would not be
-          possible without you and your continued support.
-        </p>
-        <div class="mt-4 text-xl">
-          <Button
-            fa={{
-              icon: "fa-donate",
-            }}
-            onClick={() => showModal("Support")}
-            text="support"
-            class="w-full p-8"
-          />
-        </div>
-      </section>
-      <div></div>
-      <section>
-        <H2 fa={{ icon: "fa-envelope" }} text="contact" />
-        <p>
-          If you encounter a bug, have a feature request or just want to say hi
-          - here are the different ways you can contact me directly.
-        </p>
-        <div class="mt-4 grid w-full grid-cols-1 gap-4 text-xl sm:grid-cols-2 lg:grid-cols-4">
-          <Button
-            text="mail"
-            fa={{ icon: "fa-envelope" }}
-            onClick={() => showModal("Contact")}
-            class="w-full p-8"
-          />
-          <Button
-            text="twitter"
-            fa={{ icon: "fa-twitter", variant: "brand" }}
-            href="https://x.com/monkeytype"
-            class="w-full p-8"
-          />
-          <Button
-            text="discord"
-            fa={{ icon: "fa-discord", variant: "brand" }}
-            href="https://discord.gg/monkeytype"
-            class="w-full p-8"
-          />
-          <Button
-            text="github"
-            fa={{ icon: "fa-github", variant: "brand" }}
-            href="https://github.com/monkeytypegame/monkeytype"
-            class="w-full p-8"
-          />
-        </div>
-      </section>
-      <div></div>
       <section>
         <H2 fa={{ icon: "fa-users" }} text="credits" />
         <p>
@@ -330,16 +113,6 @@ export function AboutPage(): JSXElement {
         <p>
           <Button
             variant="text"
-            text="Supporters"
-            href="#supporters_title"
-            class="p-0 pt-2 pr-2 pb-2"
-          />
-          who helped financially by donating, enabling optional ads or buying
-          merch
-        </p>
-        <p>
-          <Button
-            variant="text"
             text="Contributors"
             href="https://github.com/monkeytypegame/monkeytype/graphs/contributors"
             class="p-0 pt-2 pr-2 pb-2"
@@ -347,53 +120,6 @@ export function AboutPage(): JSXElement {
           on GitHub that have helped with implementing various features, adding
           themes and more
         </p>
-      </section>
-      <Advertisement id="ad-about-2" visible="sellout" />
-      <div></div>
-      <section>
-        <H2
-          id="supporters_title"
-          fa={{ icon: "fa-hand-holding-usd" }}
-          text="top supporters"
-        />
-        <AsyncContent
-          queries={{ supporters }}
-          errorMessage="Failed to get supporters"
-        >
-          {({ supportersData }) => (
-            <div
-              class="grid"
-              style={{
-                "grid-template-columns": "repeat(auto-fill, minmax(13em, 1fr))",
-              }}
-            >
-              <For each={supportersData()}>{(name) => <div>{name}</div>}</For>
-            </div>
-          )}
-        </AsyncContent>
-      </section>
-      <div></div>
-      <section>
-        <H2
-          id="contributors_title"
-          fa={{ icon: "fa-code-branch" }}
-          text="contributors"
-        />
-        <AsyncContent
-          queries={{ contributors }}
-          errorMessage="Failed to get contributors"
-        >
-          {({ contributorsData }) => (
-            <div
-              class="grid"
-              style={{
-                "grid-template-columns": "repeat(auto-fill, minmax(13em, 1fr))",
-              }}
-            >
-              <For each={contributorsData()}>{(name) => <div>{name}</div>}</For>
-            </div>
-          )}
-        </AsyncContent>
       </section>
     </div>
   );

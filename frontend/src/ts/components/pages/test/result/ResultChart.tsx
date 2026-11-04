@@ -3,7 +3,6 @@ import type {
   LabelPosition,
 } from "chartjs-plugin-annotation";
 
-import { getFunbox } from "@monkeytype/funbox";
 import { roundTo2 } from "@monkeytype/util/numbers";
 import {
   Chart,
@@ -23,14 +22,11 @@ import {
 } from "solid-js";
 import { z } from "zod";
 
-import { useTagsLiveQuery } from "../../../../collections/tags";
 import { setConfig } from "../../../../config/setters";
 import { getConfig } from "../../../../config/store";
 import { Theme } from "../../../../constants/themes";
-import * as DB from "../../../../db";
 import { createEffectOn } from "../../../../hooks/effects";
 import { useLocalStorage } from "../../../../hooks/useLocalStorage";
-import { isAuthenticated } from "../../../../states/core";
 import { showSuccessNotification } from "../../../../states/notifications";
 import {
   getSmoothedBurst,
@@ -129,96 +125,9 @@ function buildChartData(
   };
 }
 
-function pbLine(
-  id: "lpb" | "tpb",
-  value: number,
-  content: string,
-  theme: Theme,
-  fontFamily: string,
-  position: LabelPosition = "center",
-  xAdjust?: number,
-): AnnotationOptions<"line"> {
-  return {
-    display: true,
-    type: "line",
-    id,
-    scaleID: "wpm",
-    value,
-    borderColor: `${theme.sub}55`,
-    borderWidth: 1,
-    label: {
-      backgroundColor: theme.sub,
-      font: {
-        family: fontFamily,
-        size: 11,
-        style: "normal",
-        weight: Chart.defaults.font.weight as string,
-        lineHeight: Chart.defaults.font.lineHeight as number,
-      },
-      color: theme.bg,
-      padding: 3,
-      borderRadius: 3,
-      position,
-      xAdjust,
-      content,
-      display: true,
-    },
-  };
-}
-
-function getLocalPbWpm(result: CompletedResult): number {
-  const localPb = DB.getLocalPB(
-    result.mode,
-    result.mode2,
-    result.punctuation,
-    result.numbers,
-    result.language,
-    result.difficulty,
-    result.lazyMode,
-    getFunbox(result.funbox),
-  );
-  return localPb?.wpm ?? 0;
-}
-
-function buildPbLines(
-  localPbWpm: number,
-  unit: TypingSpeedUnitSettings,
-  theme: Theme,
-  fontFamily: string,
-  tagPbs: { name: string; pb: number }[],
-): AnnotationOptions<"line">[] {
-  const lines: AnnotationOptions<"line">[] = [];
-
-  if (localPbWpm !== 0) {
-    const value = roundTo2(unit.fromWpm(localPbWpm));
-    lines.push(
-      pbLine("lpb", value, ` PB: ${value.toFixed(2)} `, theme, fontFamily),
-    );
-  }
-
-  tagPbs.forEach((tag, i) => {
-    const value = unit.fromWpm(tag.pb);
-    const start = i % 2 === 0;
-    lines.push(
-      pbLine(
-        "tpb",
-        value,
-        `${tag.name} PB: ${roundTo2(value).toFixed(2)}`,
-        theme,
-        fontFamily,
-        start ? "start" : "end",
-        start ? 15 : -15,
-      ),
-    );
-  });
-
-  return lines;
-}
-
 function getMinMax(
   data: ChartData,
   vis: ChartDataVisibility,
-  pbLines: AnnotationOptions<"line">[],
   unit: TypingSpeedUnitSettings,
   startAtZero: boolean,
 ): { min: number; max: number } {
@@ -229,17 +138,6 @@ function getMinMax(
   ];
 
   let max = Math.max(...values);
-
-  const lineValues = pbLines
-    .filter((line) => line.display === true)
-    .map((line) => line.value as number);
-  if (lineValues.length > 0) {
-    const maxLine = Math.max(...lineValues);
-    const range = unit.fromWpm(20);
-    if (max >= maxLine - range && max <= maxLine + range) {
-      max = Math.round(maxLine + range);
-    }
-  }
   max = Math.ceil(max / 10) * 10;
 
   // round down to nearest multiple of 10
@@ -297,24 +195,7 @@ type LegendItem = {
   visible?: () => boolean;
 };
 
-const hasTagPbLines = (): boolean =>
-  resultState.tags.some((tag) => tag.chartPb !== undefined);
-
 const legend: LegendItem[] = [
-  {
-    id: "pbLine",
-    text: "pb",
-    icon: "fa-crown",
-    legendColor: "[--legend-color:var(--sub-color)]",
-    visible: () => isAuthenticated(),
-  },
-  {
-    id: "tagPbLine",
-    text: "tag pb",
-    icon: "fa-tag",
-    legendColor: "[--legend-color:var(--sub-color)]",
-    visible: () => isAuthenticated() && hasTagPbLines(),
-  },
   {
     id: "raw",
     text: "raw",
@@ -563,14 +444,7 @@ export function ResultChart(props: {
   result: CompletedResult;
   eventLog: EventLog;
 }): JSXElement {
-  const tags = useTagsLiveQuery();
   let chart: Chart<"line" | "scatter", number[]> | undefined;
-
-  // read once per result - saveResult() overwrites the local pb with this result
-  const localPbWpm = createMemo(() => {
-    const result = props.result;
-    return untrack(() => getLocalPbWpm(result));
-  });
 
   const chartConfig = createMemo((prev: ChartConfig | undefined) => {
     const unit = getTypingSpeedUnit(getConfig.typingSpeedUnit);
@@ -579,7 +453,6 @@ export function ResultChart(props: {
 
     // only build while visible - the result outlives the result screen, and
     // showResult() shows it after the details and tags are set, so this runs once per result
-    // (plus once more if tags load after the result shows)
     if (!isResultShown()) {
       return (
         prev ?? buildChartConfig(emptyChartData, vis, [], 0, 0, unit, theme)
@@ -588,15 +461,6 @@ export function ResultChart(props: {
 
     const result = props.result;
     const fontFamily = getConfig.fontFamily.replace(/_/g, " ");
-    // state, not tags(): reading tags() suspends until the collection is ready.
-    // draw the chart now, tag pb lines show up once their tag has loaded
-    const tagPbs = resultState.tags.flatMap((tag) => {
-      const name = tags.state.get(tag.id)?.name;
-      return tag.chartPb !== undefined && name !== undefined
-        ? [{ name, pb: tag.chartPb }]
-        : [];
-    });
-
     const data = buildChartData(
       result,
       props.eventLog,
@@ -605,20 +469,14 @@ export function ResultChart(props: {
       isFakeChartData(),
     );
 
-    const pbLines = buildPbLines(localPbWpm(), unit, theme, fontFamily, tagPbs);
-    for (const line of pbLines) {
-      line.display = line.id === "lpb" ? vis.pbLine : vis.tagPbLine;
-    }
-
     const { min, max } = getMinMax(
       data,
       vis,
-      pbLines,
       unit,
       getConfig.startGraphsAtZero,
     );
     const label = funboxLabel(result, min, theme, fontFamily);
-    const annotations = label !== undefined ? [...pbLines, label] : pbLines;
+    const annotations = label !== undefined ? [label] : [];
 
     return buildChartConfig(data, vis, annotations, min, max, unit, theme);
   });

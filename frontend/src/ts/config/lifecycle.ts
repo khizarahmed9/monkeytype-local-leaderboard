@@ -15,7 +15,6 @@ import { configEvent } from "../events/config";
 import { migrateConfig } from "./utils";
 import { promiseWithResolvers } from "../utils/misc";
 import { setConfig } from "./setters";
-import { deleteConfig } from "../ape/config";
 import { typedKeys } from "@monkeytype/util/objects";
 import { batch } from "solid-js";
 
@@ -49,7 +48,7 @@ export async function loadFromLocalStorage(): Promise<void> {
     await resetConfig();
   } else {
     await applyConfig(newConfig);
-    saveFullConfigToLocalStorage(true);
+    saveFullConfigToLocalStorage();
   }
   loadDone();
 }
@@ -114,8 +113,7 @@ export async function applyConfig(
 
 export async function resetConfig(): Promise<void> {
   await applyConfig(getDefaultConfig());
-  await deleteConfig();
-  saveFullConfigToLocalStorage(true);
+  saveFullConfigToLocalStorage();
 }
 
 const { promise: configLoadPromise, resolve: loadDone } =
