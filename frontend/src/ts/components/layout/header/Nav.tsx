@@ -80,6 +80,11 @@ export function Nav(): JSXElement {
               balloon={{ text: "copy game code", position: "down" }}
               class={cn({ "opacity-(--nav-focus-opacity)": isFocusMode() })}
               onClick={() => {
+                // no clipboard api on plain http
+                if (!window.isSecureContext) {
+                  showNoticeNotification(`Game code: ${game().code}`);
+                  return;
+                }
                 void navigator.clipboard
                   .writeText(game().code)
                   .then(() => showNoticeNotification("Game code copied"));

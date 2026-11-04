@@ -35,6 +35,8 @@ Set these as environment variables, or in a `.env` file next to `docker-compose.
 
 ## HTTPS and reverse proxies
 
+The game works over plain HTTP, which is fine on a home network. Browsers turn off a few things there: copy buttons do not work, and the app cannot be installed or used offline.
+
 Put the server behind any reverse proxy and set `TRUST_PROXY=1`, otherwise all players share one rate limit. Live updates use a long-lived connection, so turn off response buffering for `/api`. For nginx:
 
 ```nginx
