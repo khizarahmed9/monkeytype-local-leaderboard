@@ -31,7 +31,7 @@ pnpm install
 pnpm dev
 ```
 
-The site runs on <http://localhost:3000> and proxies `/api` to the server on port 5005. Run the checks with `pnpm exec turbo run ts-check test build`.
+The site runs on <http://localhost:3000> and proxies `/api` to the server on port 5005. Run the checks with `pnpm exec turbo run ts-check build && pnpm exec turbo run test`.
 
 ## Anticheat
 

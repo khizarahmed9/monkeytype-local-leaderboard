@@ -30,7 +30,7 @@ jobs:
       # nothing reaches main unless the fork still works
       - name: Test and build
         if: steps.sync.outputs.changed == 'true'
-        run: pnpm exec turbo run ts-check test build
+        run: pnpm exec turbo run ts-check build && pnpm exec turbo run test
       - name: Commit
         if: steps.sync.outputs.changed == 'true'
         run: |

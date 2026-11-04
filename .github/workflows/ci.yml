@@ -25,7 +25,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec turbo run ts-check test build
+      - run: pnpm exec turbo run ts-check build
+      - run: pnpm exec turbo run test
 
   docker:
     name: Docker image
