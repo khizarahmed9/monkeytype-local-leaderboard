@@ -6,6 +6,7 @@
 backend/
 docker/
 packages/release/
+packages/contracts/
 
 # fork specific tooling and docs
 .github/
@@ -19,6 +20,8 @@ commitlint.config.cjs
 monkeytype.code-workspace
 README.md
 docs/SELF_HOSTING.md
+docs/CONTRIBUTING.md
+docs/CONTRIBUTING_BASIC.md
 docs/CONTRIBUTING_ADVANCED.md
 docs/AGENT_BROWSER.md
 docs/PROFILING.md

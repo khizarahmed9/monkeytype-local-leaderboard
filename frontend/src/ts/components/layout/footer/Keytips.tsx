@@ -1,6 +1,7 @@
 import { JSXElement, Show } from "solid-js";
 
 import { getConfig } from "../../../config/store";
+import { getRoutePage } from "../../../states/router";
 import { isFocusMode } from "../../../states/test";
 import { cn } from "../../../utils/cn";
 import { CommandlineHotkey } from "../../hotkeys/CommandlineHotkey";
@@ -14,10 +15,14 @@ export function Keytips(): JSXElement {
           "opacity-0": isFocusMode(),
         })}
       >
-        <div class="flex items-center gap-2">
-          <QuickRestartHotkey />
-          <span>- restart test</span>
-        </div>
+        <Show
+          when={getRoutePage() !== "play" && getRoutePage() !== "leaderboards"}
+        >
+          <div class="flex items-center gap-2">
+            <QuickRestartHotkey />
+            <span>- restart test</span>
+          </div>
+        </Show>
 
         <div class="flex items-center gap-2">
           <CommandlineHotkey />

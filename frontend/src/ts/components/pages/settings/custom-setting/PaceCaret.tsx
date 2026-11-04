@@ -1,18 +1,15 @@
-import {
-  ConfigSchema,
-  PaceCaretCustomSpeedSchema,
-} from "@monkeytype/schemas/configs";
+import { PaceCaretCustomSpeedSchema } from "@monkeytype/schemas/configs";
 import { createForm } from "@tanstack/solid-form";
 import { For, JSXElement } from "solid-js";
 
 import {
   configMetadata,
   getOptionSearchKeywords,
+  getVisibleOptions,
 } from "../../../../config/metadata";
 import { setConfig } from "../../../../config/setters";
 import { getConfig } from "../../../../config/store";
 import { useSavedIndicator } from "../../../../hooks/useSavedIndicator";
-import { getOptions } from "../../../../utils/zod";
 import { Button } from "../../../common/Button";
 import { InputField } from "../../../ui/form/InputField";
 import { fromSchema } from "../../../ui/form/utils";
@@ -77,7 +74,7 @@ export function PaceCaret(): JSXElement {
             />
           </form>
           <div class="grid grid-cols-[repeat(auto-fit,minmax(6rem,1fr))] gap-2">
-            <For each={getOptions(ConfigSchema.shape.paceCaret)}>
+            <For each={getVisibleOptions("paceCaret")}>
               {(option) => {
                 const optionMeta = configMetadata.paceCaret
                   .optionsMetadata as Record<

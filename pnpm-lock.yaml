@@ -365,46 +365,6 @@ importers:
         specifier: 4.1.0
         version: 4.1.0(@opentelemetry/api@1.9.1)(@types/node@24.9.1)(happy-dom@20.8.9)(jsdom@27.4.0(supports-color@10.2.2))(vite@8.0.5(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@types/node@24.9.1)(esbuild@0.25.0)(jiti@2.7.0)(sass@1.98.0)(terser@5.49.1)(tsx@4.21.0)(yaml@2.8.3))
 
-  packages/contracts:
-    dependencies:
-      '@monkeytype/schemas':
-        specifier: workspace:*
-        version: link:../schemas
-      '@ts-rest/core':
-        specifier: 3.52.1
-        version: 3.52.1(@types/node@24.9.1)(zod@3.23.8)
-      zod:
-        specifier: 3.23.8
-        version: 3.23.8
-    devDependencies:
-      '@monkeytype/tsup-config':
-        specifier: workspace:*
-        version: link:../tsup-config
-      '@monkeytype/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      '@types/node':
-        specifier: 24.9.1
-        version: 24.9.1
-      madge:
-        specifier: 8.0.0
-        version: 8.0.0(supports-color@10.2.2)(typescript@7.0.2)
-      oxlint:
-        specifier: 1.88.0
-        version: 1.88.0(oxlint-tsgolint@7.0.2004)
-      oxlint-tsgolint:
-        specifier: 7.0.2004
-        version: 7.0.2004
-      tsup:
-        specifier: 8.4.0
-        version: 8.4.0(jiti@2.7.0)(postcss@8.5.8)(supports-color@10.2.2)(tsx@4.21.0)(typescript@7.0.2)(yaml@2.8.3)
-      typescript:
-        specifier: 7.0.2
-        version: 7.0.2
-      vitest:
-        specifier: 4.1.0
-        version: 4.1.0(@opentelemetry/api@1.9.1)(@types/node@24.9.1)(happy-dom@20.8.9)(jsdom@27.4.0(supports-color@10.2.2))(vite@8.0.5(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@types/node@24.9.1)(esbuild@0.27.7)(jiti@2.7.0)(sass@1.98.0)(terser@5.49.1)(tsx@4.21.0)(yaml@2.8.3))
-
   packages/funbox:
     dependencies:
       '@monkeytype/schemas':
@@ -3108,17 +3068,6 @@ packages:
   '@ts-graphviz/core@2.0.3':
     resolution: {integrity: sha512-EZ+XlSwjdLtscoBOnA/Ba6QBrmoxAR73tJFjnWxaJQsZxWBQv6bLUrDgZUdXkXRAOSkRHn0uXY6Wq/3SsV2WtQ==}
     engines: {node: '>=18'}
-
-  '@ts-rest/core@3.52.1':
-    resolution: {integrity: sha512-tAjz7Kxq/grJodcTA1Anop4AVRDlD40fkksEV5Mmal88VoZeRKAG8oMHsDwdwPZz+B/zgnz0q2sF+cm5M7Bc7g==}
-    peerDependencies:
-      '@types/node': ^18.18.7 || >=20.8.4
-      zod: ^3.22.3
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      zod:
-        optional: true
 
   '@turbo/darwin-64@2.9.14':
     resolution: {integrity: sha512-t7QiPflaEyBE4oayeZtSmu4mEfjgIrcNlNNl1z1dmIVPqEdtA7+CfTf8d7KXsOGPh6aNgWjKxyvQg9uGfDQF+A==}
@@ -9430,11 +9379,6 @@ snapshots:
     dependencies:
       '@ts-graphviz/ast': 2.0.3
       '@ts-graphviz/common': 2.1.2
-
-  '@ts-rest/core@3.52.1(@types/node@24.9.1)(zod@3.23.8)':
-    optionalDependencies:
-      '@types/node': 24.9.1
-      zod: 3.23.8
 
   '@turbo/darwin-64@2.9.14':
     optional: true

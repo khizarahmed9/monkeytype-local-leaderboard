@@ -1067,13 +1067,14 @@ const configMetadataEntries = {
     optionsMetadata: {
       tagPb: {
         displayString: "tag pb",
+        visible: false,
       },
-      average: {},
+      average: { visible: false },
       custom: {},
-      daily: {},
+      daily: { visible: false },
       last: {},
       off: {},
-      pb: {},
+      pb: { visible: false },
     },
     isBlocked: ({ value }) => {
       return ["pb", "tagPb", "average", "daily"].includes(value);
@@ -1670,7 +1671,7 @@ const configMetadataEntries = {
         displayString: "favorite",
       },
       auto: {},
-      custom: {},
+      custom: { visible: false },
       dark: {},
       light: {},
       off: {},
