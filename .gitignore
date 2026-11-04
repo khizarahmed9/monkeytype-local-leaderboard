@@ -145,3 +145,5 @@ frontend/scripts/keylog-report.ts
 # Claude Code local files
 .claude/
 CLAUDE.md
+server/data/
+data/
