@@ -18,7 +18,7 @@ const settings = {
 
 /** A 30s result at any speed, the typed characters follow from it. */
 function buildResultAt(wpm: number): object {
-  const chars = wpm * 2.5;
+  const chars = Math.round(wpm * 2.5);
   return buildResult({
     wpm,
     rawWpm: wpm + 2,
