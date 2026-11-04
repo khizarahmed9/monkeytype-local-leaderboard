@@ -1,0 +1,36 @@
+name: Notify on failure
+
+# Opens an issue assigned to the owner, which GitHub turns into an email. No
+# mail server or address is needed, so none is stored in this repo.
+on:
+  workflow_run:
+    workflows: [CI, Upstream sync]
+    types: [completed]
+
+permissions:
+  issues: write
+
+env:
+  OWNER: khizarahmed9
+
+jobs:
+  notify:
+    if: github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      WORKFLOW: ${{ github.event.workflow_run.name }}
+      RUN_URL: ${{ github.event.workflow_run.html_url }}
+    steps:
+      - name: Open or update the issue
+        run: |
+          title="$WORKFLOW failed"
+          body="@$OWNER $WORKFLOW failed: $RUN_URL"
+          number=$(gh issue list --state open --search "in:title \"$title\"" \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body "$body"
+          else
+            gh issue create --title "$title" --assignee "$OWNER" --body "$body"
+          fi

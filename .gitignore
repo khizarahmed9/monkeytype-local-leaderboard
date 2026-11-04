@@ -146,4 +146,4 @@ frontend/scripts/keylog-report.ts
 .claude/
 CLAUDE.md
 server/data/
-data/
+/data/

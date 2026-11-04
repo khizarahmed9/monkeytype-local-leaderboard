@@ -1,0 +1,14 @@
+services:
+  monkeytype:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${PORT:-5005}:5005"
+    environment:
+      - GAME_TTL_DAYS=${GAME_TTL_DAYS:-30}
+      - TRUST_PROXY=${TRUST_PROXY:-0}
+    volumes:
+      - monkeytype-data:/data
+
+volumes:
+  monkeytype-data:

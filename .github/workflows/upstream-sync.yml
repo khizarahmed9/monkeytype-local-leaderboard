@@ -1,0 +1,41 @@
+name: Upstream sync
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: upstream-sync
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Apply upstream changes
+        id: sync
+        run: .github/scripts/upstream-sync.sh
+      - name: Update lockfile
+        if: steps.sync.outputs.changed == 'true'
+        run: pnpm install --no-frozen-lockfile
+      # nothing reaches main unless the fork still works
+      - name: Test and build
+        if: steps.sync.outputs.changed == 'true'
+        run: pnpm exec turbo run ts-check test build
+      - name: Commit
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          git config user.name "Khizar Ahmed"
+          git config user.email "179360065+khizarahmed9@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: sync upstream ${{ steps.sync.outputs.range }}"
+          git push

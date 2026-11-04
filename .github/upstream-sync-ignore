@@ -1,0 +1,38 @@
+# Upstream paths that never come across in a sync, one git pathspec per line.
+# Files this fork deleted are skipped automatically, list a path here only to
+# stop upstream adding new files to it, or to keep this fork's copy of a file.
+
+# replaced by server/
+backend/
+docker/
+packages/release/
+
+# fork specific tooling and docs
+.github/
+.claude/
+CLAUDE.md
+AGENTS.md
+scripts/
+.fallowrc.json
+monkeytype.code-workspace
+README.md
+docs/SELF_HOSTING.md
+docs/CONTRIBUTING_ADVANCED.md
+docs/AGENT_BROWSER.md
+docs/PROFILING.md
+docs/specs/
+
+# regenerated after each sync
+pnpm-lock.yaml
+
+# features this fork removed
+frontend/firebase.json
+frontend/src/ts/ape/
+frontend/src/ts/collections/
+frontend/src/ts/components/pages/account/
+frontend/src/ts/components/pages/account-settings/
+frontend/src/ts/components/pages/connections/
+frontend/src/ts/components/pages/leaderboard/
+frontend/src/ts/components/pages/login/
+frontend/src/ts/components/pages/profile/
+frontend/src/ts/queries/
