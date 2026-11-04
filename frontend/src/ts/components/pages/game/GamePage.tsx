@@ -35,7 +35,6 @@ import {
   createGame,
   findGame,
   joinGame,
-  resumeGame,
 } from "../../../controllers/game-controller";
 import { navigate } from "../../../router/navigate";
 import { getGameLabel } from "../../../states/game";
@@ -387,18 +386,13 @@ function ChooseName(props: { game: Game; onBack: () => void }): JSXElement {
 export function GamePage(): JSXElement {
   const [getFound, setFound] = createSignal<Game | null>(null);
 
-  const open = (game: Game): void => {
-    if (resumeGame(game)) void navigate({ to: "/" });
-    else setFound(game);
-  };
-
   return (
     <div class="content-grid grid content-center py-8">
       <Show
         when={getFound()}
         fallback={
           <div class="grid grid-cols-[minmax(0,1fr)] gap-16 md:grid-cols-2">
-            <JoinGame onFound={open} />
+            <JoinGame onFound={setFound} />
             <CreateGame onCreated={setFound} />
           </div>
         }

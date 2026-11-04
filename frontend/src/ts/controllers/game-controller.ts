@@ -34,15 +34,19 @@ import * as CustomText from "../test/custom-text";
 import { typedKeys } from "@monkeytype/util/objects";
 import { LocalStorageWithSchema } from "../utils/local-storage-with-schema";
 
-// players of a game can't pick their name again, so leaving keeps the session
-// for coming back
+const PlayerSchema = z.object({
+  playerId: z.string(),
+  token: z.string(),
+  name: z.string(),
+});
+
+// every name this browser played under, per game. people take turns on one
+// device, typing a name again has to bring back that player
 const sessions = new LocalStorageWithSchema({
-  key: "gameSessions",
+  key: "gamePlayers",
   schema: z.object({
-    active: GameCodeSchema.nullable(),
-    players: z.record(
-      z.object({ playerId: z.string(), token: z.string(), name: z.string() }),
-    ),
+    active: z.object({ code: GameCodeSchema, nameKey: z.string() }).nullable(),
+    players: z.record(z.record(PlayerSchema)),
   }),
   fallback: { active: null, players: {} },
 });
@@ -72,26 +76,27 @@ export async function createGame(settings: GameSettings): Promise<Game> {
 }
 
 export async function joinGame(game: Game, name: string): Promise<void> {
-  const player = await request<Omit<GamePlayer, "name">>(
-    `/games/${game.code}/players`,
-    { method: "POST", body: JSON.stringify({ name }) },
-  );
+  const trimmedName = name.trim();
+  const nameKey = trimmedName.toLowerCase();
   const { players } = sessions.get();
-  sessions.set({
-    active: game.code,
-    players: { ...players, [game.code]: { ...player, name } },
-  });
-  enterGame(game, { ...player, name });
-}
+  const gamePlayers = players[game.code] ?? {};
 
-/** Back into a game this browser already joined, if it did. */
-export function resumeGame(game: Game): boolean {
-  const { players } = sessions.get();
-  const player = players[game.code];
-  if (player === undefined) return false;
-  sessions.set({ active: game.code, players });
+  const player = gamePlayers[nameKey] ?? {
+    ...(await request<Omit<GamePlayer, "name">>(`/games/${game.code}/players`, {
+      method: "POST",
+      body: JSON.stringify({ name: trimmedName }),
+    })),
+    name: trimmedName,
+  };
+
+  sessions.set({
+    active: { code: game.code, nameKey },
+    players: {
+      ...players,
+      [game.code]: { ...gamePlayers, [nameKey]: player },
+    },
+  });
   enterGame(game, player);
-  return true;
 }
 
 export function leaveGame(): void {
@@ -108,13 +113,14 @@ export async function restoreGame(): Promise<boolean> {
   if (active === null) return false;
 
   await configLoadPromise;
+  const player = players[active.code]?.[active.nameKey];
   try {
-    const game = await findGame(active);
-    return resumeGame(game);
+    if (player === undefined) throw new Error("Player not found");
+    enterGame(await findGame(active.code), player);
+    return true;
   } catch (error) {
     showErrorNotification("Could not rejoin your game", { error });
-    const { [active]: _gone, ...rest } = players;
-    sessions.set({ active: null, players: rest });
+    sessions.set({ active: null, players });
     return false;
   }
 }
