@@ -7,8 +7,6 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "full-check": "turbo lint build test lint-styles lint-json check-assets --force",
-    "prepare": "husky install",
-    "pre-commit": "lint-staged",
     "ts-check": "turbo run ts-check",
     "lint": "turbo run lint",
     "lint-fe": "turbo run lint --filter @monkeytype/frontend",
@@ -42,15 +40,10 @@
     "dev-server": "turbo run dev --force --filter @monkeytype/server"
   },
   "devDependencies": {
-    "@commitlint/cli": "20.5.2",
-    "@commitlint/config-conventional": "19.2.2",
     "@types/node": "24.9.1",
     "@vitest/coverage-v8": "4.1.5",
     "caniuse-lite": "1.0.30001778",
-    "conventional-changelog": "6.0.0",
-    "husky": "8.0.1",
     "knip": "2.19.2",
-    "lint-staged": "13.2.3",
     "only-allow": "1.2.1",
     "oxfmt": "0.73.0",
     "oxlint": "1.88.0",
@@ -62,17 +55,6 @@
     "turbo": "2.9.14",
     "vitest": "4.1.0",
     "yaml": "2.8.3"
-  },
-  "lint-staged": {
-    "*": [
-      "oxfmt --no-error-on-unmatched-pattern"
-    ],
-    "*.{ts,tsx,js}": [
-      "oxlint --type-aware --type-check"
-    ],
-    "*.{scss,css}": [
-      "stylelint"
-    ]
   },
   "engines": {
     "node": ">=24.0.0 <25"

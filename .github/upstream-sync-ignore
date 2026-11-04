@@ -14,6 +14,8 @@ CLAUDE.md
 AGENTS.md
 scripts/
 .fallowrc.json
+.husky/
+commitlint.config.cjs
 monkeytype.code-workspace
 README.md
 docs/SELF_HOSTING.md

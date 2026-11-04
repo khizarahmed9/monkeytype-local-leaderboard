@@ -2,7 +2,7 @@ FROM node:24.22.1-slim AS build
 WORKDIR /app
 RUN npm install -g pnpm@11.21.0
 COPY . .
-RUN HUSKY=0 pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 RUN pnpm exec turbo run build --filter=@monkeytype/frontend --filter=@monkeytype/server
 
 FROM node:24.22.1-slim
