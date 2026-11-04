@@ -2,6 +2,7 @@ import { JSXElement } from "solid-js";
 
 import { Button } from "../common/Button";
 import { H2, H3 } from "../common/Headers";
+import { Kbd } from "../common/Kbd";
 import { CommandlineHotkey } from "../hotkeys/CommandlineHotkey";
 import { QuickRestartHotkey } from "../hotkeys/QuickRestartHotkey";
 
@@ -9,32 +10,57 @@ export function AboutPage(): JSXElement {
   return (
     <div class="content-grid grid gap-8">
       <section class="text-center text-sub">
-        Created with love by Miodec.
+        Made by Khizar Ahmed.
         <br />
-        Launched on 15th of May, 2020.
+        Based on Monkeytype, created by Miodec.
       </section>
       <section>
         <H2 fa={{ icon: "fa-info-circle" }} text="about" />
         <p>
-          Monkeytype is a minimalistic and customizable typing test. It features
-          many test modes and user-configurable features such as themes, sounds, a smooth caret,
-          and more. Monkeytype attempts to emulate the experience of natural
-          keyboard typing during a typing test, by unobtrusively presenting the
-          text prompts and displaying typed characters in-place, providing
-          straightforward, real-time feedback on typos, speed, and accuracy.
-          <br />
-          <br />
-          Test yourself in various modes, track your progress and improve your
-          speed.
+          This is a typing game for groups, built on Monkeytype. Someone creates
+          a game, everyone joins with its code, and a live leaderboard shows who
+          is fastest. There are no accounts, no passwords and no ads, and anyone
+          can host their own copy.
         </p>
       </section>
       <section>
-        <H3 fa={{ icon: "fa-align-left" }} text="word set" />
+        <H3 fa={{ icon: "fa-gamepad" }} text="how to play" />
         <p>
-          By default, this website uses the most common 200 words in the English
-          language to generate its tests. You can change to an expanded set
-          (1000 most common words) in the options, or change the language
-          entirely.
+          Join with a 5 character code, or create a game and share its code. The
+          host picks the test: time, words, quote, zen or custom text, plus
+          punctuation, numbers and language. Those settings are locked for
+          everyone, unless the host lets players choose their own.
+          <br />
+          <br />
+          Type your name and play. Your name stays on your results, and everyone
+          using the same name shares a place on the leaderboard.
+        </p>
+      </section>
+      <section>
+        <H3 fa={{ icon: "fa-crown" }} text="leaderboard" />
+        <p>
+          The crown button opens the leaderboard for your game. It lists
+          everyone who has joined, ranked by their best wpm, and updates as
+          tests finish. A notification also pops up on the typing page when
+          someone finishes a test.
+        </p>
+      </section>
+      <section>
+        <H3 fa={{ icon: "fa-users" }} text="sharing a device" />
+        <p>
+          After a finished test, the next start asks who is playing, so you can
+          pass the keyboard along. Press <Kbd text="ctrl + enter" /> to go again
+          as the same player. Restarting in the middle of a test keeps your name
+          too.
+        </p>
+      </section>
+      <section>
+        <H3 fa={{ icon: "fa-shield-alt" }} text="fair play" />
+        <p>
+          Results are checked on the server before they reach the leaderboard. A
+          result is rejected if it is too short, below 75% accuracy, doesn't
+          match the game's settings, or has speed and key timing that don't add
+          up. Abandoned tests and repeated tests don't count.
         </p>
       </section>
       <section>
@@ -42,7 +68,7 @@ export function AboutPage(): JSXElement {
         <p>
           You can use <QuickRestartHotkey /> to restart the typing test. Open
           the command line by pressing <CommandlineHotkey /> - there you can
-          access all the functionality you need without touching your mouse.
+          change your theme and other preferences without touching your mouse.
         </p>
       </section>
       <section>
@@ -81,16 +107,33 @@ export function AboutPage(): JSXElement {
         <H3 fa={{ icon: "fa-chart-area" }} text="results screen" />
         <p>
           After completing a test you will be able to see your wpm, raw wpm,
-          accuracy, character stats, test length and test
-          info (you can hover over some values to get floating point numbers).
-          You can also see a graph of your wpm and raw over the duration of the
-          test. Remember that the wpm line is a global average, while the raw
-          wpm line is a local, momentary value (meaning if you stop, the value
-          is 0).
+          accuracy, character stats, test length and test info (you can hover
+          over some values to get floating point numbers). You can also see a
+          graph of your wpm and raw over the duration of the test. Remember that
+          the wpm line is a global average, while the raw wpm line is a local,
+          momentary value (meaning if you stop, the value is 0).
         </p>
       </section>
       <section>
         <H2 fa={{ icon: "fa-users" }} text="credits" />
+        <p>
+          <Button
+            variant="text"
+            text="Khizar Ahmed"
+            href="https://khiz3r.me/"
+            class="p-0 pt-2 pr-2 pb-2"
+          />
+          for this version
+        </p>
+        <p>
+          <Button
+            variant="text"
+            text="Miodec"
+            href="https://github.com/monkeytypegame/monkeytype"
+            class="p-0 pt-2 pr-2 pb-2"
+          />
+          for creating Monkeytype, which this site is based on
+        </p>
         <p>
           <Button
             variant="text"
@@ -108,7 +151,7 @@ export function AboutPage(): JSXElement {
             class="p-0 pt-2 pr-2 pb-2"
           />
           who provided valuable feedback on the original reddit post for the
-          prototype of this website
+          prototype of Monkeytype
         </p>
         <p>
           <Button
@@ -117,8 +160,8 @@ export function AboutPage(): JSXElement {
             href="https://github.com/monkeytypegame/monkeytype/graphs/contributors"
             class="p-0 pt-2 pr-2 pb-2"
           />
-          on GitHub that have helped with implementing various features, adding
-          themes and more
+          on GitHub that have helped Monkeytype with implementing various
+          features, adding themes and more
         </p>
       </section>
     </div>

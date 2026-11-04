@@ -40,4 +40,5 @@ frontend/src/ts/components/pages/connections/
 frontend/src/ts/components/pages/leaderboard/
 frontend/src/ts/components/pages/login/
 frontend/src/ts/components/pages/profile/
+frontend/src/ts/components/pages/settings/
 frontend/src/ts/queries/

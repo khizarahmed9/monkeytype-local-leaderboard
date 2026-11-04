@@ -13,9 +13,7 @@ import { createRouterPage } from "../components/core/Page";
 import { GameLeaderboardPage } from "../components/pages/game/GameLeaderboardPage";
 import { GamePage } from "../components/pages/game/GamePage";
 import { restoreGame } from "../controllers/game-controller";
-import { SettingsPage } from "../components/pages/settings/SettingsPage";
 import { TestPage } from "../components/pages/test/TestPage";
-import { SettingsSearchSchema } from "../states/settings-highlight";
 import { applyUrlActions } from "../url-actions/apply";
 
 /** A page of the site, rendered by its route (see `staticData.page`). */
@@ -23,7 +21,6 @@ export type PageName =
   | "loading"
   | "test"
   | "about"
-  | "settings"
   | "404"
   | "leaderboards"
   | "play";
@@ -106,14 +103,6 @@ const about = createRoute({
   component: createRouterPage(AboutPage),
 });
 
-const settings = createRoute({
-  getParentRoute: () => userDataRoute,
-  path: "/settings",
-  staticData: { page: "settings" },
-  component: createRouterPage(SettingsPage),
-  validateSearch: SettingsSearchSchema,
-});
-
 export const routeTree = root.addChildren([
-  userDataRoute.addChildren([test, play, leaderboard, about, settings]),
+  userDataRoute.addChildren([test, play, leaderboard, about]),
 ]);

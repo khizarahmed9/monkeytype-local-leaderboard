@@ -31,15 +31,6 @@ const commands: Command[] = [
     },
   },
   {
-    id: "viewSettings",
-    display: "View Settings Page",
-    alias: "navigate go to",
-    fa: { icon: "fa-cog" },
-    exec: (): void => {
-      void navigate({ to: "/settings" });
-    },
-  },
-  {
     id: "toggleFullscreen",
     display: "Toggle Fullscreen",
     fa: { icon: "fa-expand" },

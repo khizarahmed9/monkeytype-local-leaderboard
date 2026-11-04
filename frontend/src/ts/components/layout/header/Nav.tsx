@@ -57,18 +57,6 @@ export function Nav(): JSXElement {
         }}
         to="/about"
       />
-      <Button
-        variant="text"
-        fa={{
-          icon: "fa-cog",
-          fixedWidth: true,
-        }}
-        class={buttonClass()}
-        to="/settings"
-        dataset={{
-          "data-nav-item": "settings",
-        }}
-      />
       <div class="grow"></div>
       <Show when={getGame()}>
         {(game) => (

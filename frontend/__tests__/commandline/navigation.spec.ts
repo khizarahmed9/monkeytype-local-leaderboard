@@ -13,7 +13,7 @@ import { getRouter, setRouter } from "../../src/ts/router/instance";
 // stands in for the app's route tree
 function createTestRouter(): ReturnType<typeof createRouter> {
   const root = createRootRoute();
-  const paths = ["/", "/leaderboard", "/about", "/settings"];
+  const paths = ["/", "/leaderboard", "/about"];
   return createRouter({
     routeTree: root.addChildren(
       paths.map((path) => createRoute({ getParentRoute: () => root, path })),
@@ -50,7 +50,6 @@ describe("commandline navigation", () => {
   it.each([
     ["viewTypingPage", "/"],
     ["viewLeaderboards", "/leaderboard"],
-    ["viewSettings", "/settings"],
   ])("%s opens %s", async (id, href) => {
     expect(await execAndGetHref(id)).toBe(href);
   });
