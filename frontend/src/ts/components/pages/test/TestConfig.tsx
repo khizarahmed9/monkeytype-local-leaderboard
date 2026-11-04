@@ -1,11 +1,10 @@
-import { ComponentProps, For, JSXElement, Show } from "solid-js";
+import { ComponentProps, For, JSXElement } from "solid-js";
 
 import { configMetadata } from "../../../config/metadata";
 import { setConfig, setQuoteLengthAll } from "../../../config/setters";
 import { getConfig } from "../../../config/store";
 import { createEffectOn } from "../../../hooks/effects";
 import { useRefWithUtils } from "../../../hooks/useRefWithUtils";
-import { } from "../../../states/core";
 import { showModal } from "../../../states/modals";
 import {
   isTestFinished,

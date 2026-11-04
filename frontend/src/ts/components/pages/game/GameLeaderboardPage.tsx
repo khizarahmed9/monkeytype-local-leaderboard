@@ -23,7 +23,10 @@ export function GameLeaderboardPage(): JSXElement {
   return (
     <div class="content-grid grid content-start gap-4 py-8">
       <div>
-        <H2 text={`leaderboard ${getGame()?.code ?? ""}`} fa={{ icon: "fa-crown" }} />
+        <H2
+          text={`leaderboard ${getGame()?.code ?? ""}`}
+          fa={{ icon: "fa-crown" }}
+        />
         <Show when={getGame()}>
           {(game) => (
             <div class="text-sub">{getGameLabel(game().settings)}</div>

@@ -8,5 +8,5 @@ export function addSeconds(s: number): void {
 
 export function getString(): string {
   const secString = DateTime.secondsToString(Math.round(seconds), true, true);
-  return secString + " session";
+  return `${secString} session`;
 }

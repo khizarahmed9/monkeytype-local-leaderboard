@@ -205,7 +205,10 @@ export function checkResult(
   }
 
   if (settings.locked && !matchesLockedSettings(result, settings)) {
-    return reject(RESULT_DATA_INVALID, "Result doesn't match the game settings");
+    return reject(
+      RESULT_DATA_INVALID,
+      "Result doesn't match the game settings",
+    );
   }
 
   if (!hasConsistentNumbers(result)) {

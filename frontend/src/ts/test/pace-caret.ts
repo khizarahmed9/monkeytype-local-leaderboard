@@ -1,15 +1,12 @@
 import * as TestWords from "./test-words";
 import { Config } from "../config/store";
-import * as Misc from "../utils/misc";
 import { configEvent } from "../events/config";
-import { getActiveFunboxes } from "./funbox/list";
 import { Caret } from "../elements/caret";
 import { ElementWithUtils } from "../utils/dom";
 import {
   isDirectionReversed,
   isLanguageRightToLeft,
   getActiveWordIndex,
-  getCurrentQuote,
   isTestFinished,
   isPaceRepeat,
   isTestActive,
@@ -76,7 +73,6 @@ export function resetCaretPosition(): void {
 
 export async function init(): Promise<void> {
   caret?.hide();
-  const mode2 = Misc.getMode2(Config, getCurrentQuote());
   let wpm = 0;
   if (Config.paceCaret === "custom") {
     wpm = Config.paceCaretCustomSpeed;

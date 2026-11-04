@@ -1,29 +1,13 @@
 import { createForm } from "@tanstack/solid-form";
-import {
-  JSXElement,
-  createSignal,
-  createEffect,
-  For,
-  Show,
-  on,
-} from "solid-js";
+import { JSXElement, createSignal, createEffect, For, on } from "solid-js";
 import { z } from "zod";
 
 import { setConfig } from "../../config/setters";
 import { Config } from "../../config/store";
 import QuotesController, { Quote } from "../../controllers/quotes-controller";
-import { createTrigger } from "../../hooks/createTrigger";
 import { createDebouncedEffectOn } from "../../hooks/effects";
-import { hideLoaderBar, showLoaderBar } from "../../states/loader-bar";
-import {
-  hideModalAndClearChain,
-  isModalOpen,
-  showModal,
-} from "../../states/modals";
-import {
-  showNoticeNotification,
-  showErrorNotification,
-} from "../../states/notifications";
+import { hideModalAndClearChain, isModalOpen } from "../../states/modals";
+import { showNoticeNotification } from "../../states/notifications";
 import { showSimpleModal } from "../../states/simple-modal";
 import { setSelectedQuoteId } from "../../states/test";
 import * as TestLogic from "../../test/test-logic";
@@ -340,100 +324,98 @@ export function QuoteSearchModal(): JSXElement {
   };
 
   return (
-    <>
-      <AnimatedModal
-        id="QuoteSearch"
-        focusFirstInput={true}
-        beforeShow={handleBeforeShow}
-        afterShow={handleAfterShow}
-        modalClass="max-w-[1000px] h-[80vh] grid-rows-[auto_auto_1fr_auto]"
-      >
-        <div class="flex flex-col justify-between gap-2 sm:flex-row">
-          <div class="text-2xl text-sub">Quote search</div>
-        </div>
-        <div class="flex flex-col gap-4 sm:flex-row">
-          <form.Field
-            name="searchText"
-            listeners={{
-              onChange: ({ value }) => {
-                if (!isOpen()) return;
-                setSearchText(value);
-              },
-            }}
-            children={(field) => (
-              <InputField
-                class="grow-3"
-                field={field}
-                placeholder="filter by text, source or id"
-                autocomplete="off"
-                dir="auto"
-                maxLength={200}
-              />
-            )}
-          />
-          <div class="grow">
-            <SlimSelect
-              appendTo="container"
-              multiple
-              options={[
-                { value: "0", text: "short" },
-                { value: "1", text: "medium" },
-                { value: "2", text: "long" },
-                { value: "3", text: "thicc" },
-                { value: "4", text: "custom" },
-              ]}
-              selected={lengthFilter()}
-              onChange={(val) => setLengthFilter(val)}
-              settings={{
-                showSearch: false,
-                placeholderText: "filter by length",
-              }}
+    <AnimatedModal
+      id="QuoteSearch"
+      focusFirstInput={true}
+      beforeShow={handleBeforeShow}
+      afterShow={handleAfterShow}
+      modalClass="max-w-[1000px] h-[80vh] grid-rows-[auto_auto_1fr_auto]"
+    >
+      <div class="flex flex-col justify-between gap-2 sm:flex-row">
+        <div class="text-2xl text-sub">Quote search</div>
+      </div>
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <form.Field
+          name="searchText"
+          listeners={{
+            onChange: ({ value }) => {
+              if (!isOpen()) return;
+              setSearchText(value);
+            },
+          }}
+          children={(field) => (
+            <InputField
+              class="grow-3"
+              field={field}
+              placeholder="filter by text, source or id"
+              autocomplete="off"
+              dir="auto"
+              maxLength={200}
             />
-          </div>
+          )}
+        />
+        <div class="grow">
+          <SlimSelect
+            appendTo="container"
+            multiple
+            options={[
+              { value: "0", text: "short" },
+              { value: "1", text: "medium" },
+              { value: "2", text: "long" },
+              { value: "3", text: "thicc" },
+              { value: "4", text: "custom" },
+            ]}
+            selected={lengthFilter()}
+            onChange={(val) => setLengthFilter(val)}
+            settings={{
+              showSearch: false,
+              placeholderText: "filter by length",
+            }}
+          />
         </div>
-        <div
-          class="grid content-baseline gap-2 overflow-y-auto"
-          dir={isRtl() ? "rtl" : undefined}
-        >
-          <For each={pageQuotes()}>
-            {(quote) => (
-              <Item
-                quote={quote}
-                matchedTerms={searchResults().matchedTerms}
-                isRtl={isRtl()}
-                onSelect={() => applyQuote(quote.id)}
-              />
-            )}
-          </For>
-        </div>
+      </div>
+      <div
+        class="grid content-baseline gap-2 overflow-y-auto"
+        dir={isRtl() ? "rtl" : undefined}
+      >
+        <For each={pageQuotes()}>
+          {(quote) => (
+            <Item
+              quote={quote}
+              matchedTerms={searchResults().matchedTerms}
+              isRtl={isRtl()}
+              onSelect={() => applyQuote(quote.id)}
+            />
+          )}
+        </For>
+      </div>
+      <div
+        class={cn(
+          "grid grid-cols-2 items-center justify-center gap-2",
+          "sm:grid-cols-3",
+        )}
+      >
+        <Button
+          class="justify-self-end px-10 sm:w-max"
+          fa={{ icon: "fa-chevron-left", fixedWidth: true }}
+          disabled={currentPage() <= 1}
+          onClick={() => setCurrentPage((p) => p - 1)}
+        />
         <div
           class={cn(
-            "grid grid-cols-2 items-center justify-center gap-2",
-            "sm:grid-cols-3",
+            "col-span-2 row-start-1 px-4 text-center text-sub",
+            "sm:col-span-1 sm:row-auto",
           )}
         >
-          <Button
-            class="justify-self-end px-10 sm:w-max"
-            fa={{ icon: "fa-chevron-left", fixedWidth: true }}
-            disabled={currentPage() <= 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          />
-          <div
-            class={cn(
-              "col-span-2 row-start-1 px-4 text-center text-sub",
-              "sm:col-span-1 sm:row-auto",
-            )}
-          >
-            {pageInfo()}
-          </div>
-          <Button
-            class="px-10 sm:w-max"
-            fa={{ icon: "fa-chevron-right", fixedWidth: true }}
-            disabled={currentPage() >= totalPages()}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          />
+          {pageInfo()}
         </div>
-      </AnimatedModal>
-    </>
+        <Button
+          class="px-10 sm:w-max"
+          fa={{ icon: "fa-chevron-right", fixedWidth: true }}
+          disabled={currentPage() >= totalPages()}
+          onClick={() => setCurrentPage((p) => p + 1)}
+        />
+      </div>
+    </AnimatedModal>
   );
 }

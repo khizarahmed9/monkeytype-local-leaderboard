@@ -1,4 +1,4 @@
-import { For, JSXElement, Show, untrack } from "solid-js";
+import { For, JSXElement, Show, } from "solid-js";
 import { debounce } from "throttle-debounce";
 import { z } from "zod";
 
@@ -26,7 +26,6 @@ import { buildCustomThemeLink } from "../../../../url-actions/actions/custom-the
 import { cn } from "../../../../utils/cn";
 import { hexToHSL } from "../../../../utils/colors";
 import {
-  normalizeName,
   replaceUnderscoresWithSpaces,
 } from "../../../../utils/strings";
 import { AnimeSwitch } from "../../../common/anime";

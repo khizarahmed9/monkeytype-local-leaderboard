@@ -1,7 +1,6 @@
 import type {
   AnnotationOptions,
-  LabelPosition,
-} from "chartjs-plugin-annotation";
+  } from "chartjs-plugin-annotation";
 
 import { roundTo2 } from "@monkeytype/util/numbers";
 import {
@@ -17,7 +16,6 @@ import {
   For,
   JSXElement,
   Show,
-  untrack,
   createRoot,
 } from "solid-js";
 import { z } from "zod";
@@ -31,8 +29,7 @@ import { showSuccessNotification } from "../../../../states/notifications";
 import {
   getSmoothedBurst,
   isResultShown,
-  resultState,
-} from "../../../../states/result";
+  } from "../../../../states/result";
 import { CompletedResult, getLastEventLog } from "../../../../states/test";
 import { getTheme } from "../../../../states/theme";
 import {

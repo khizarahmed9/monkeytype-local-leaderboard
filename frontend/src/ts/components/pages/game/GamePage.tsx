@@ -1,3 +1,6 @@
+import type { Language } from "@monkeytype/schemas/languages";
+import type { Optgroup } from "slim-select/store";
+
 import {
   type Game,
   GAME_CODE_LENGTH,
@@ -12,13 +15,22 @@ import {
   MIN_WORDS,
   normalizeGameSettings,
 } from "@monkeytype/schemas/games";
-import { LanguageGroupNames, LanguageGroups } from "../../../constants/languages";
-import type { Language } from "@monkeytype/schemas/languages";
-import type { Optgroup } from "slim-select/store";
-import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js";
+import {
+  createSignal,
+  For,
+  JSXElement,
+  Match,
+  onMount,
+  Show,
+  Switch,
+} from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { Config } from "../../../config/store";
+import {
+  LanguageGroupNames,
+  LanguageGroups,
+} from "../../../constants/languages";
 import {
   createGame,
   findGame,
@@ -53,6 +65,10 @@ const languageOptionGroups = LanguageGroupNames.map(
       })),
     }) as Optgroup,
 );
+
+function focusOnMount(element: HTMLInputElement): void {
+  onMount(() => element.focus());
+}
 
 function OptionRow(props: { title: string; children: JSXElement }): JSXElement {
   return (
@@ -142,7 +158,10 @@ function CreateGame(props: { onCreated: (game: Game) => void }): JSXElement {
   };
 
   return (
-    <form class="grid min-w-0 content-start gap-4" onSubmit={(e) => void submit(e)}>
+    <form
+      class="grid min-w-0 content-start gap-4"
+      onSubmit={(e) => void submit(e)}
+    >
       <H2 text="create a game" fa={{ icon: "fa-plus" }} class="text-2xl" />
 
       <OptionRow title="lock settings">
@@ -288,18 +307,20 @@ function JoinGame(props: { onFound: (game: Game) => void }): JSXElement {
   };
 
   return (
-    <form class="grid min-w-0 content-start gap-4" onSubmit={(e) => void submit(e)}>
+    <form
+      class="grid min-w-0 content-start gap-4"
+      onSubmit={(e) => void submit(e)}
+    >
       <H2 text="join a game" fa={{ icon: "fa-users" }} class="text-2xl" />
       <input
         class="w-full text-center text-4xl tracking-[0.3em] uppercase"
         aria-label="game code"
         placeholder="code"
         autocomplete="off"
-        spellcheck={false}
         maxLength={GAME_CODE_LENGTH}
         value={getCode()}
         onInput={(e) => setCode(e.currentTarget.value.toUpperCase())}
-        autofocus
+        ref={focusOnMount}
       />
       <Button
         variant="button"
@@ -312,10 +333,7 @@ function JoinGame(props: { onFound: (game: Game) => void }): JSXElement {
   );
 }
 
-function ChooseName(props: {
-  game: Game;
-  onBack: () => void;
-}): JSXElement {
+function ChooseName(props: { game: Game; onBack: () => void }): JSXElement {
   const [getName, setName] = createSignal("");
   const [isJoining, setJoining] = createSignal(false);
 
@@ -347,7 +365,7 @@ function ChooseName(props: {
         maxLength={20}
         value={getName()}
         onInput={(e) => setName(e.currentTarget.value)}
-        autofocus
+        ref={focusOnMount}
       />
       <Button
         variant="button"
@@ -385,9 +403,7 @@ export function GamePage(): JSXElement {
           </div>
         }
       >
-        {(game) => (
-          <ChooseName game={game()} onBack={() => setFound(null)} />
-        )}
+        {(game) => <ChooseName game={game()} onBack={() => setFound(null)} />}
       </Show>
     </div>
   );

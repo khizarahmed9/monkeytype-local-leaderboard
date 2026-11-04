@@ -47,7 +47,10 @@ const sessions = new LocalStorageWithSchema({
   fallback: { active: null, players: {} },
 });
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(
+  path: string,
+  init?: Omit<RequestInit, "headers"> & { headers?: Record<string, string> },
+): Promise<T> {
   const response = await fetch(`/api${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
@@ -185,13 +188,16 @@ function listenForEvents(code: string): void {
   });
 }
 
-export async function submitResult(completedEvent: CompletedEvent): Promise<void> {
+export async function submitResult(
+  completedEvent: CompletedEvent,
+): Promise<void> {
   const game = getGame();
   const player = getPlayer();
   if (game === null || player === null) return;
 
   // the client drops key data from long tests, the server expects that. the
   // json round trip drops undefined keys, which would change the hash
+  // oxlint-disable-next-line unicorn/prefer-structured-clone -- it keeps undefined
   const result = JSON.parse(JSON.stringify(completedEvent)) as CompletedEvent;
   result.uid = player.playerId;
   if (result.testDuration > 122) {

@@ -5,7 +5,6 @@ import {
   createRootRouteWithContext,
   createRoute,
   redirect,
-  type StaticDataRouteOption,
 } from "@tanstack/solid-router";
 
 import { PageSwitcher } from "../components/core/PageSwitcher";
@@ -116,11 +115,5 @@ const settings = createRoute({
 });
 
 export const routeTree = root.addChildren([
-  userDataRoute.addChildren([
-    test,
-    play,
-    leaderboard,
-    about,
-    settings,
-  ]),
+  userDataRoute.addChildren([test, play, leaderboard, about, settings]),
 ]);

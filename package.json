@@ -23,7 +23,6 @@
     "dev": "turbo run dev --force",
     "dev-fe": "turbo run dev --force --filter @monkeytype/frontend",
     "dev-pkg": "turbo run dev --force --filter=\"./packages/*\"",
-    "storybook": "turbo run storybook --force",
     "start": "node server/dist/index.cjs",
     "start-fe": "turbo run start --filter @monkeytype/frontend",
     "audit-fe": "cd frontend && npm run audit",

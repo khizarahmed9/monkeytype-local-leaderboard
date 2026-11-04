@@ -1,5 +1,4 @@
 import { JSXElement, Show } from "solid-js";
-import { envConfig } from "virtual:env-config";
 
 import { showCommandline } from "../../../states/commandline";
 import { getIsScreenshotting } from "../../../states/core";

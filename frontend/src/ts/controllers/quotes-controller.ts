@@ -1,5 +1,5 @@
 import { removeLanguageSize } from "../utils/strings";
-import { randomElementFromArray, shuffle } from "../utils/arrays";
+import { shuffle } from "../utils/arrays";
 import { cachedFetchJson } from "../utils/json-data";
 import { configEvent } from "../events/config";
 import { tryCatch } from "@monkeytype/util/trycatch";

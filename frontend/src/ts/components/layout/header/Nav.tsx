@@ -2,9 +2,8 @@ import { JSXElement, Show } from "solid-js";
 
 import { leaveGame } from "../../../controllers/game-controller";
 import { getGame } from "../../../states/game";
-import { showNoticeNotification } from "../../../states/notifications";
-
 import { showModal } from "../../../states/modals";
+import { showNoticeNotification } from "../../../states/notifications";
 import { getRoutePage } from "../../../states/router";
 import { isFocusMode } from "../../../states/test";
 import { restartTest } from "../../../test/test-logic";

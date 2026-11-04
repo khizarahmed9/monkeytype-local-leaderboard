@@ -9,8 +9,7 @@ import {
   getNotifications,
   getNotificationHistory,
   __testing,
-  AddNotificationOptions,
-} from "../../src/ts/states/notifications";
+  } from "../../src/ts/states/notifications";
 
 const { clearNotificationHistory } = __testing;
 

@@ -2,7 +2,6 @@ packages:
   - frontend
   - server
   - packages/*
-  - frontend/storybook
 
 allowBuilds:
   '@firebase/util': set this to true or false

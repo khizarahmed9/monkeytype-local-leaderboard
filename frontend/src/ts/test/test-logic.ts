@@ -23,7 +23,6 @@ import * as PaceCaret from "./pace-caret";
 import * as TestTimer from "./test-timer";
 import * as Replay from "../components/pages/test/result/replay";
 import * as TodayTracker from "./today-tracker";
-import * as ChallengeContoller from "../controllers/challenge-controller";
 import { showConfetti } from "../elements/confetti";
 import * as Arrays from "../utils/arrays";
 import { getGlarsesMode } from "../states/glarses-mode";
@@ -45,7 +44,6 @@ import {
   isRepeated,
   isTestActive,
   pushIncompleteTest,
-  resetIncompleteTests,
   setIsPaceRepeat,
   setIsRepeated,
   setIsTestInvalid,
@@ -56,7 +54,6 @@ import {
   getBailedOut,
   isResultCalculating,
   setBailedOut,
-  setLastSignedOutResult,
   setResultCalculating,
   setTestFinished,
   setTestActive,
@@ -79,7 +76,6 @@ import * as TestWords from "./test-words";
 import * as WordsGenerator from "./words-generator";
 import { canStartTest } from "./test-page-state";
 import { configEvent } from "../events/config";
-import { Mode } from "@monkeytype/schemas/shared";
 import {
   CompletedEvent,
   CompletedEventCustomText,
@@ -92,7 +88,6 @@ import {
   isFunboxActive,
   isFunboxActiveWithProperty,
 } from "./funbox/list";
-import { getFunbox } from "@monkeytype/funbox";
 import { WordGenError } from "../utils/word-gen-error";
 import { tryCatch } from "@monkeytype/util/trycatch";
 import { showLoaderBar, hideLoaderBar } from "../states/loader-bar";
@@ -100,9 +95,7 @@ import { canQuickRestart } from "../utils/quick-restart";
 import {
   ResultDetails,
   setResultShown,
-  resultState,
   setResultState,
-  setCrownType,
 } from "../states/result";
 import { blurInputElement, setInputElementValue } from "../input/input-element";
 import { debounce } from "throttle-debounce";
@@ -949,10 +942,7 @@ export async function finish(difficultyFailed = false): Promise<void> {
     showNoticeNotification("Test invalid - raw");
     setIsTestInvalid(true);
     dontSave = true;
-  } else if (
-    completedEvent.acc < 75 ||
-    completedEvent.acc > 100
-  ) {
+  } else if (completedEvent.acc < 75 || completedEvent.acc > 100) {
     showNoticeNotification("Test invalid - accuracy");
     setIsTestInvalid(true);
     dontSave = true;
