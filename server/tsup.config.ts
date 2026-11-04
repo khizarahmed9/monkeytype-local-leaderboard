@@ -7,5 +7,7 @@ export default defineConfig({
   platform: "node",
   target: "node24",
   noExternal: [/.*/],
+  // node:sqlite only exists with the prefix
+  removeNodeProtocol: false,
   clean: true,
 });

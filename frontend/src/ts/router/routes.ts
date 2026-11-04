@@ -11,6 +11,9 @@ import {
 import { PageSwitcher } from "../components/core/PageSwitcher";
 import { AboutPage } from "../components/pages/AboutPage";
 import { createRouterPage } from "../components/core/Page";
+import { GameLeaderboardPage } from "../components/pages/game/GameLeaderboardPage";
+import { GamePage } from "../components/pages/game/GamePage";
+import { restoreGame } from "../controllers/game-controller";
 import { SettingsPage } from "../components/pages/settings/SettingsPage";
 import { TestPage } from "../components/pages/test/TestPage";
 import { SettingsSearchSchema } from "../states/settings-highlight";
@@ -23,7 +26,8 @@ export type PageName =
   | "about"
   | "settings"
   | "404"
-  | "leaderboards";
+  | "leaderboards"
+  | "play";
 
 declare module "@tanstack/solid-router" {
   // oxlint-disable-next-line typescript/consistent-type-definitions -- module augmentation needs an interface
@@ -37,6 +41,11 @@ declare module "@tanstack/solid-router" {
 export type RouterContext = {
   queryClient: QueryClient;
 };
+
+async function requireGame(preload: boolean): Promise<void> {
+  if (preload) return;
+  if (!(await restoreGame())) redirect({ to: "/play", throw: true });
+}
 
 // each route renders its page, the page switcher fades between them
 const root = createRootRouteWithContext<RouterContext>()({
@@ -61,7 +70,8 @@ const test = createRoute({
   component: createRouterPage(TestPage),
   // shared links (test settings, custom theme, challenge): applied, then
   // dropped from the url so a reload doesn't apply them again
-  beforeLoad: ({ location, preload }) => {
+  beforeLoad: async ({ location, preload }) => {
+    await requireGame(preload);
     if (preload) return;
     const rest = applyUrlActions(location);
     if (rest === undefined) return;
@@ -75,12 +85,19 @@ const test = createRoute({
   },
 });
 
-// GAME: leaderboard page
+const play = createRoute({
+  getParentRoute: () => userDataRoute,
+  path: "/play",
+  staticData: { page: "play" },
+  component: createRouterPage(GamePage),
+});
+
 const leaderboard = createRoute({
   getParentRoute: () => userDataRoute,
   path: "/leaderboard",
   staticData: { page: "leaderboards" },
-  component: createRouterPage(() => null),
+  component: createRouterPage(GameLeaderboardPage),
+  beforeLoad: async ({ preload }) => requireGame(preload),
 });
 
 const about = createRoute({
@@ -101,6 +118,7 @@ const settings = createRoute({
 export const routeTree = root.addChildren([
   userDataRoute.addChildren([
     test,
+    play,
     leaderboard,
     about,
     settings,

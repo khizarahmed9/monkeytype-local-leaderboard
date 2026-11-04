@@ -65,7 +65,7 @@ export function createApp({
     res.json({ status: "ok" });
   });
 
-  api.post("/games", limit(60 * 60 * 1000, 30), (req, res) => {
+  api.post("/games", limit(60 * 60 * 1000, 60), (req, res) => {
     const parsed = CreateGameRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: firstIssue(parsed.error) });
@@ -75,8 +75,8 @@ export function createApp({
     res.status(201).json(db.createGame(settings, now()));
   });
 
-  // everything below acts on one game. the limit is what stops someone
-  // walking the code space
+  // everything below acts on one game. the limits are per ip and players of
+  // a game usually share one, they only have to stop someone walking the codes
   const game = express.Router({ mergeParams: true });
   game.use((req: Request<{ code: string }>, res, next) => {
     const code = GameCodeSchema.safeParse(req.params.code.toUpperCase());
@@ -89,11 +89,11 @@ export function createApp({
     next();
   });
 
-  game.get("/", limit(60 * 1000, 60), (_req, res) => {
+  game.get("/", limit(60 * 1000, 300), (_req, res) => {
     res.json(res.locals["game"]);
   });
 
-  game.post("/players", limit(60 * 1000, 20), (req, res) => {
+  game.post("/players", limit(60 * 1000, 60), (req, res) => {
     const parsed = JoinGameRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: firstIssue(parsed.error) });
@@ -110,17 +110,17 @@ export function createApp({
     res.status(201).json(player);
   });
 
-  game.get("/leaderboard", limit(60 * 1000, 120), (_req, res) => {
+  game.get("/leaderboard", limit(60 * 1000, 1200), (_req, res) => {
     const { code } = res.locals["game"] as { code: string };
     res.json(db.getLeaderboard(code));
   });
 
-  game.get("/events", limit(60 * 1000, 30), (_req, res) => {
+  game.get("/events", limit(60 * 1000, 120), (_req, res) => {
     const { code } = res.locals["game"] as { code: string };
     subscribe(code, res);
   });
 
-  game.post("/results", limit(60 * 1000, 30), (req, res) => {
+  game.post("/results", limit(60 * 1000, 120), (req, res) => {
     const { code, settings } = res.locals["game"] as {
       code: string;
       settings: Parameters<typeof checkResult>[1]["settings"];

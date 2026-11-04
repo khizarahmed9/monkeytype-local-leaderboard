@@ -1,3 +1,4 @@
+import * as GameController from "../controllers/game-controller";
 import {
   getRememberLazyMode,
   setRememberLazyMode,
@@ -1023,7 +1024,9 @@ export async function finish(difficultyFailed = false): Promise<void> {
   );
   setResultState("timeToday", TodayTracker.getString());
 
-  // GAME: submit result here
+  if (!dontSave && !completedEvent.bailedOut) {
+    void GameController.submitResult(completedEvent);
+  }
 
   const resultUpdatePromise = showResult(completedEvent, dontSave, {
     difficultyFailed,

@@ -94,10 +94,11 @@ function matchesLockedSettings(
     );
   }
   if (settings.mode === "custom") {
+    const wordCount = getCustomTextWords(settings.customText).length;
     return (
       result.customText?.limit.mode === "word" &&
-      result.customText.limit.value ===
-        getCustomTextWords(settings.customText).length
+      result.customText.limit.value === wordCount &&
+      result.customText.textLen === wordCount
     );
   }
   return true;

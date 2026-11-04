@@ -1,4 +1,8 @@
-import { JSXElement } from "solid-js";
+import { JSXElement, Show } from "solid-js";
+
+import { leaveGame } from "../../../controllers/game-controller";
+import { getGame } from "../../../states/game";
+import { showNoticeNotification } from "../../../states/notifications";
 
 import { showModal } from "../../../states/modals";
 import { getRoutePage } from "../../../states/router";
@@ -67,6 +71,31 @@ export function Nav(): JSXElement {
         }}
       />
       <div class="grow"></div>
+      <Show when={getGame()}>
+        {(game) => (
+          <>
+            <Button
+              variant="text"
+              text={game().code}
+              fa={{ icon: "fa-copy", fixedWidth: true }}
+              balloon={{ text: "copy game code", position: "down" }}
+              class={cn({ "opacity-(--nav-focus-opacity)": isFocusMode() })}
+              onClick={() => {
+                void navigator.clipboard
+                  .writeText(game().code)
+                  .then(() => showNoticeNotification("Game code copied"));
+              }}
+            />
+            <Button
+              variant="text"
+              fa={{ icon: "fa-sign-out-alt", fixedWidth: true }}
+              balloon={{ text: "leave game", position: "down" }}
+              class={buttonClass()}
+              onClick={leaveGame}
+            />
+          </>
+        )}
+      </Show>
       <Button
         variant="text"
         fa={{

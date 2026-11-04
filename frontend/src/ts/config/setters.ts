@@ -16,6 +16,7 @@ import { isConfigValueValid } from "./validation";
 import { FunboxName } from "@monkeytype/schemas/configs";
 import { typedKeys } from "@monkeytype/util/objects";
 import { isTestActive } from "../states/test";
+import { isConfigLocked } from "../states/game";
 
 export function setConfig<T extends keyof ConfigSchemas.Config>(
   key: T,
@@ -35,6 +36,11 @@ export function setConfig<T extends keyof ConfigSchemas.Config>(
       currentValue: Config[key],
       currentConfig: Config,
     });
+  }
+
+  if (isConfigLocked(key, value)) {
+    showNoticeNotification("This game locks that setting");
+    return false;
   }
 
   const previousValue = Config[key];
@@ -151,6 +157,11 @@ export function setQuoteLengthAll(nosave?: boolean): boolean {
 }
 
 export function toggleFunbox(funbox: FunboxName, nosave?: boolean): boolean {
+  if (isConfigLocked("funbox", [funbox])) {
+    showNoticeNotification("This game locks that setting");
+    return false;
+  }
+
   if (isTestActive() && Config.funbox.includes("no_quit")) {
     showNoticeNotification(
       "No quit funbox is active. Please finish the test.",

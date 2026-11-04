@@ -3,6 +3,7 @@ import { debounce } from "throttle-debounce";
 
 import { Config, getConfig } from "../../../config/store";
 import { getCustomTextIndicator } from "../../../states/core";
+import { isGameLocked } from "../../../states/game";
 import { listenForModifierKeys } from "../../../states/modifiers";
 import { listenForMonkeyKeys } from "../../../states/monkey";
 import { isResultShown } from "../../../states/result";
@@ -170,7 +171,9 @@ export function TestPage(): JSXElement {
   return (
     <>
       <div class="full-width">
-        <TestConfig />
+        <Show when={!isGameLocked()}>
+          <TestConfig />
+        </Show>
       </div>
 
       <div

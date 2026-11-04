@@ -305,6 +305,7 @@ export default defineConfig(({ mode }): UserConfig => {
     server: {
       open: env["SERVER_OPEN"] !== "false",
       port: 3000,
+      proxy: { "/api": "http://localhost:5005" },
       host: env["BACKEND_URL"] !== undefined,
     },
     resolve: {
