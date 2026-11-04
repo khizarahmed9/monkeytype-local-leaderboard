@@ -42,19 +42,12 @@ describe("joining a game", () => {
     });
   });
 
-  it("brings back a name this browser already played under", async () => {
+  it("adds a player for every join, even with the same name", async () => {
     const game = buildGame("ABCDE");
     await joinGame(game, "Ada");
-    await joinGame(game, "Bob");
-    await joinGame(game, " ada ");
+    await joinGame(game, " Ada ");
 
     expect(joins).toBe(2);
-    expect(getPlayer()).toEqual({ playerId: "p1", token: "t1", name: "Ada" });
-  });
-
-  it("treats the same name in another game as a new player", async () => {
-    await joinGame(buildGame("FGHJK"), "Ada");
-    await joinGame(buildGame("LMNPQ"), "Ada");
-    expect(joins).toBe(2);
+    expect(getPlayer()).toEqual({ playerId: "p2", token: "t2", name: "Ada" });
   });
 });

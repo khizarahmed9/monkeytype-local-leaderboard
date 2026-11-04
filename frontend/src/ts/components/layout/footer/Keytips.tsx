@@ -1,9 +1,11 @@
 import { JSXElement, Show } from "solid-js";
 
 import { getConfig } from "../../../config/store";
+import { isResultShown } from "../../../states/result";
 import { getRoutePage } from "../../../states/router";
 import { isFocusMode } from "../../../states/test";
 import { cn } from "../../../utils/cn";
+import { Kbd } from "../../common/Kbd";
 import { CommandlineHotkey } from "../../hotkeys/CommandlineHotkey";
 import { QuickRestartHotkey } from "../../hotkeys/QuickRestartHotkey";
 
@@ -21,6 +23,13 @@ export function Keytips(): JSXElement {
           <div class="flex items-center gap-2">
             <QuickRestartHotkey />
             <span>- restart test</span>
+          </div>
+        </Show>
+
+        <Show when={isResultShown()}>
+          <div class="flex items-center gap-2">
+            <Kbd text="ctrl + enter" />
+            <span>- same player again</span>
           </div>
         </Show>
 

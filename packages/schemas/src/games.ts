@@ -98,7 +98,6 @@ export const LeaderboardResultSchema = z.object({
 export type LeaderboardResult = z.infer<typeof LeaderboardResultSchema>;
 
 export const LeaderboardEntrySchema = z.object({
-  id: z.string(),
   name: z.string(),
   attempts: z.number().int(),
   best: LeaderboardResultSchema.nullable(),

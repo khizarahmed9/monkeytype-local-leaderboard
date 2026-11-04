@@ -1,4 +1,5 @@
 import * as GameController from "../controllers/game-controller";
+import { needsPlayerName, setNeedsPlayerName } from "../states/game";
 import {
   getRememberLazyMode,
   setRememberLazyMode,
@@ -214,6 +215,7 @@ type RestartOptions = {
   practiseMissed?: boolean;
   noAnim?: boolean;
   isQuickRestart?: boolean;
+  skipPlayerPrompt?: boolean;
 };
 
 export async function restartTest(
@@ -250,6 +252,13 @@ export async function restartTest(
     options.event?.preventDefault();
     return;
   }
+
+  if (needsPlayerName() && !options.skipPlayerPrompt) {
+    options.event?.preventDefault();
+    GameController.promptForPlayerName(() => void restartTest(options));
+    return;
+  }
+
   if (isTestActive()) {
     if (options.isQuickRestart) {
       if (Config.mode !== "zen") options.event?.preventDefault();
@@ -1017,6 +1026,7 @@ export async function finish(difficultyFailed = false): Promise<void> {
   if (!dontSave && !completedEvent.bailedOut) {
     void GameController.submitResult(completedEvent);
   }
+  setNeedsPlayerName(true);
 
   const resultUpdatePromise = showResult(completedEvent, dontSave, {
     difficultyFailed,

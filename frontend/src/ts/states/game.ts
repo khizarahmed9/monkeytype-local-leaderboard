@@ -8,6 +8,9 @@ export type GamePlayer = { playerId: string; token: string; name: string };
 export const [getGame, setGame] = createSignal<Game | null>(null);
 export const [getPlayer, setPlayer] = createSignal<GamePlayer | null>(null);
 
+/** A finished test hands the device to the next player. */
+export const [needsPlayerName, setNeedsPlayerName] = createSignal(false);
+
 export const isGameLocked = (): boolean => getGame()?.settings.locked === true;
 
 /** The test config every player of a locked game has to use. */

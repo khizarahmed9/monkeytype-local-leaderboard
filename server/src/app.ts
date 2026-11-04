@@ -102,10 +102,6 @@ export function createApp({
     const { code } = res.locals["game"] as { code: string };
     const { name } = parsed.data;
     const player = db.addPlayer(code, name, now());
-    if (player === undefined) {
-      res.status(409).json({ message: "That name is taken in this game" });
-      return;
-    }
     publish(code, { type: "join", playerId: player.playerId, name });
     res.status(201).json(player);
   });

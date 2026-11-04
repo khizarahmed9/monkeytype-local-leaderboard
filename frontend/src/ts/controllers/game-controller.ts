@@ -5,6 +5,7 @@ import {
   type GameSettings,
   getCustomTextWords,
   type LeaderboardEntry,
+  PlayerNameSchema,
 } from "@monkeytype/schemas/games";
 import type { CompletedEvent } from "@monkeytype/schemas/results";
 import { queryOptions } from "@tanstack/solid-query";
@@ -22,6 +23,7 @@ import {
   getModeLabel,
   getPlayer,
   setGame,
+  setNeedsPlayerName,
   setPlayer,
 } from "../states/game";
 import {
@@ -29,26 +31,26 @@ import {
   showNoticeNotification,
 } from "../states/notifications";
 import { getRoutePage } from "../states/router";
+import { showSimpleModal } from "../states/simple-modal";
 import { isTestActive } from "../states/test";
 import * as CustomText from "../test/custom-text";
 import { typedKeys } from "@monkeytype/util/objects";
+import { createErrorMessage } from "../utils/error";
 import { LocalStorageWithSchema } from "../utils/local-storage-with-schema";
 
-const PlayerSchema = z.object({
-  playerId: z.string(),
-  token: z.string(),
-  name: z.string(),
-});
-
-// every name this browser played under, per game. people take turns on one
-// device, typing a name again has to bring back that player
-const sessions = new LocalStorageWithSchema({
-  key: "gamePlayers",
-  schema: z.object({
-    active: z.object({ code: GameCodeSchema, nameKey: z.string() }).nullable(),
-    players: z.record(z.record(PlayerSchema)),
-  }),
-  fallback: { active: null, players: {} },
+const session = new LocalStorageWithSchema({
+  key: "gameSession",
+  schema: z
+    .object({
+      code: GameCodeSchema,
+      player: z.object({
+        playerId: z.string(),
+        token: z.string(),
+        name: z.string(),
+      }),
+    })
+    .nullable(),
+  fallback: null,
 });
 
 async function request<T>(
@@ -75,32 +77,55 @@ export async function createGame(settings: GameSettings): Promise<Game> {
   });
 }
 
-export async function joinGame(game: Game, name: string): Promise<void> {
+async function addPlayer(code: string, name: string): Promise<GamePlayer> {
   const trimmedName = name.trim();
-  const nameKey = trimmedName.toLowerCase();
-  const { players } = sessions.get();
-  const gamePlayers = players[game.code] ?? {};
-
-  const player = gamePlayers[nameKey] ?? {
-    ...(await request<Omit<GamePlayer, "name">>(`/games/${game.code}/players`, {
+  const player = {
+    ...(await request<Omit<GamePlayer, "name">>(`/games/${code}/players`, {
       method: "POST",
       body: JSON.stringify({ name: trimmedName }),
     })),
     name: trimmedName,
   };
+  session.set({ code, player });
+  return player;
+}
 
-  sessions.set({
-    active: { code: game.code, nameKey },
-    players: {
-      ...players,
-      [game.code]: { ...gamePlayers, [nameKey]: player },
+export async function joinGame(game: Game, name: string): Promise<void> {
+  enterGame(game, await addPlayer(game.code, name));
+}
+
+/** Asks who plays next, then runs `onPlayer`. Closing it changes nothing. */
+export function promptForPlayerName(onPlayer?: () => void): void {
+  const game = getGame();
+  if (game === null) return;
+
+  showSimpleModal({
+    title: "Who's playing next?",
+    buttonText: "play",
+    focusFirstInput: true,
+    schema: z.object({ name: PlayerNameSchema }),
+    inputs: { name: { type: "text", placeholder: "your name" } },
+    execFn: async ({ name }) => {
+      try {
+        setPlayer(await addPlayer(game.code, name));
+      } catch (error) {
+        return {
+          status: "error",
+          message: createErrorMessage(error, "Could not join"),
+        };
+      }
+      setNeedsPlayerName(false);
+      return {
+        status: "success",
+        showNotification: false,
+        afterHide: onPlayer,
+      };
     },
   });
-  enterGame(game, player);
 }
 
 export function leaveGame(): void {
-  sessions.set({ ...sessions.get(), active: null });
+  session.set(null);
   // a reload is what drops the locked config and the event stream
   window.location.href = "/play";
 }
@@ -109,18 +134,16 @@ export function leaveGame(): void {
 export async function restoreGame(): Promise<boolean> {
   if (getGame() !== null) return true;
 
-  const { active, players } = sessions.get();
+  const active = session.get();
   if (active === null) return false;
 
   await configLoadPromise;
-  const player = players[active.code]?.[active.nameKey];
   try {
-    if (player === undefined) throw new Error("Player not found");
-    enterGame(await findGame(active.code), player);
+    enterGame(await findGame(active.code), active.player);
     return true;
   } catch (error) {
     showErrorNotification("Could not rejoin your game", { error });
-    sessions.set({ active: null, players });
+    session.set(null);
     return false;
   }
 }

@@ -2,8 +2,9 @@ import { JSXElement, onCleanup, onMount, Show } from "solid-js";
 import { debounce } from "throttle-debounce";
 
 import { Config, getConfig } from "../../../config/store";
+import { promptForPlayerName } from "../../../controllers/game-controller";
 import { getCustomTextIndicator } from "../../../states/core";
-import { isGameLocked } from "../../../states/game";
+import { isGameLocked, needsPlayerName } from "../../../states/game";
 import { listenForModifierKeys } from "../../../states/modifiers";
 import { listenForMonkeyKeys } from "../../../states/monkey";
 import { isResultShown } from "../../../states/result";
@@ -105,7 +106,8 @@ export function TestPage(): JSXElement {
     listenForModifierKeys(signal);
     listenForMonkeyKeys(signal);
     // any previously rendered words are gone, start a fresh test
-    void restartTest({ noAnim: true });
+    void restartTest({ noAnim: true, skipPlayerPrompt: true });
+    if (needsPlayerName()) promptForPlayerName();
 
     resetIncompleteTests();
     // registered last so it runs after the modules above have unbound

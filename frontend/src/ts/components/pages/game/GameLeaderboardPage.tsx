@@ -65,7 +65,9 @@ export function GameLeaderboardPage(): JSXElement {
                   {(entry, index) => (
                     <tr
                       class={cn("odd:bg-sub-alt", {
-                        "text-main": entry.id === getPlayer()?.playerId,
+                        "text-main":
+                          entry.name.toLowerCase() ===
+                          getPlayer()?.name.toLowerCase(),
                       })}
                     >
                       <td class={cellClass}>

@@ -63,10 +63,9 @@ export class Database {
       CREATE TABLE IF NOT EXISTS players (
         id TEXT PRIMARY KEY,
         game_code TEXT NOT NULL REFERENCES games(code) ON DELETE CASCADE,
-        name TEXT NOT NULL COLLATE NOCASE,
+        name TEXT NOT NULL,
         token_hash TEXT NOT NULL,
-        joined_at INTEGER NOT NULL,
-        UNIQUE (game_code, name)
+        joined_at INTEGER NOT NULL
       );
 
       CREATE TABLE IF NOT EXISTS results (
@@ -105,20 +104,22 @@ export class Database {
     return { code, settings: JSON.parse(row.settings) as GameSettings };
   }
 
-  /** Undefined when the name is taken. */
+  /**
+   * Every join is its own row, so anticheat timing is per sitting. People with
+   * the same name share a leaderboard entry.
+   */
   addPlayer(
     code: string,
     name: string,
     now: number,
-  ): { playerId: string; token: string } | undefined {
+  ): { playerId: string; token: string } {
     const playerId = randomBytes(12).toString("hex");
     const token = randomBytes(32).toString("hex");
-    const { changes } = this.db
+    this.db
       .prepare(
-        "INSERT OR IGNORE INTO players (id, game_code, name, token_hash, joined_at) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO players (id, game_code, name, token_hash, joined_at) VALUES (?, ?, ?, ?, ?)",
       )
       .run(playerId, code, name, hashToken(token), now);
-    if (changes === 0) return undefined;
     this.touchGame(code, now);
     return { playerId, token };
   }
@@ -186,15 +187,18 @@ export class Database {
       )
       .all(code) as ResultRow[];
 
-    const entries = new Map<string, LeaderboardEntry>(
-      players.map((player) => [
-        player.id,
-        { id: player.id, name: player.name, attempts: 0, best: null },
-      ]),
-    );
+    const nameKeys = new Map<string, string>();
+    const entries = new Map<string, LeaderboardEntry>();
+    for (const player of players) {
+      const nameKey = player.name.toLowerCase();
+      nameKeys.set(player.id, nameKey);
+      if (!entries.has(nameKey)) {
+        entries.set(nameKey, { name: player.name, attempts: 0, best: null });
+      }
+    }
 
     for (const row of results) {
-      const entry = entries.get(row.player_id);
+      const entry = entries.get(nameKeys.get(row.player_id) ?? "");
       if (entry === undefined) continue;
       entry.attempts++;
       entry.best ??= {

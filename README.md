@@ -8,7 +8,7 @@ Open the site, then either join with a 5 character game code or create a game an
 
 - **Game codes:** share a random 5 character code. Nobody needs a password.
 - **Locked settings:** the host picks time, words, quote, zen or a custom text, plus punctuation, numbers and language. Everyone plays the same test type, and the server rejects results that don't match. Hosts can turn locking off.
-- **Shared devices:** everyone types their name when they join, so people can take turns on one device. Typing a name again on that device continues as that player.
+- **Shared devices:** the site asks for a name when you join and after every finished test, so people can take turns on one device. Names are never blocked, and everyone using the same name shares a leaderboard row. Press `ctrl + enter` to go again as the same player, or restart mid-test.
 - **Live leaderboard:** each player's best result, updated as tests finish. Open it with the crown button.
 - **Anticheat:** results are checked on the server, see [below](#anticheat).
 - **Easy hosting:** one process, one SQLite file. No MongoDB, Redis or Firebase.

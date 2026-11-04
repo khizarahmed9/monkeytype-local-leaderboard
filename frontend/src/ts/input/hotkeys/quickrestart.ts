@@ -3,6 +3,7 @@ import { isAnyPopupVisible } from "../../utils/misc";
 
 import { navigate } from "../../router/navigate";
 import { restartTest } from "../../test/test-logic";
+import { setNeedsPlayerName } from "../../states/game";
 import { getRoutePage } from "../../states/router";
 import { hotkeys, quickRestartHotkeyMap } from "../../states/hotkeys";
 import { createHotkey } from "./utils";
@@ -22,6 +23,20 @@ function quickRestart(e: KeyboardEvent): void {
     void navigate({ to: "/" });
   }
 }
+
+// the same player goes again, without being asked for a name
+createRoot(() =>
+  createHotkey(
+    () => "Control+Enter",
+    (e) => {
+      if (isAnyPopupVisible() || getRoutePage() !== "test") return;
+      e.preventDefault();
+      setNeedsPlayerName(false);
+      void restartTest();
+    },
+    () => ({ enabled: true }),
+  ),
+);
 
 // Disable restartTest when we're in long test and quick restartTest key is enter, because `shift + enter, shift +
 // enter` is already reserved for bail out keybind.

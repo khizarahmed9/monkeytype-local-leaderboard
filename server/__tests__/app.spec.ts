@@ -150,11 +150,25 @@ describe("game api", () => {
     expect(res.status).toBe(400);
   });
 
-  it("rejects taken names regardless of case", async () => {
+  it("merges players with the same name on the leaderboard", async () => {
     const code = await createGame();
-    await join(code, "Ada");
-    const res = await post(`/games/${code}/players`, { name: "ada" });
-    expect(res.status).toBe(409);
+    const first = await join(code, "Ada");
+    time += 31_000;
+    await post(`/games/${code}/results`, { result: buildResultAt(70) }, first);
+    const second = await join(code, "ada");
+    time += 31_000;
+    await post(`/games/${code}/results`, { result: buildResultAt(60) }, second);
+
+    const res = await fetch(`${base}/games/${code}/leaderboard`);
+    const board = (await res.json()) as {
+      name: string;
+      attempts: number;
+      best: { wpm: number };
+    }[];
+    expect(board).toHaveLength(1);
+    expect(board[0]?.name).toBe("Ada");
+    expect(board[0]?.attempts).toBe(2);
+    expect(board[0]?.best.wpm).toBe(70);
   });
 
   it("rejects markup in names", async () => {
