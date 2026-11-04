@@ -58,9 +58,9 @@ export function AboutPage(): JSXElement {
         <H3 fa={{ icon: "fa-shield-alt" }} text="fair play" />
         <p>
           Results are checked on the server before they reach the leaderboard. A
-          result is rejected if it is too short, below 75% accuracy, doesn't
-          match the game's settings, or has speed and key timing that don't add
-          up. Abandoned tests and repeated tests don't count.
+          result is rejected if it is too short, below 75% accuracy, does not
+          match the settings of the game, or has speed and key timing that do
+          not add up. Abandoned tests and repeated tests do not count.
         </p>
       </section>
       <section>

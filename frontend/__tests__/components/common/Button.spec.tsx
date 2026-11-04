@@ -247,14 +247,14 @@ describe("Button component", () => {
       <RouterContextProvider router={router}>
         {() => (
           <>
-            <Button to="/settings" text="Settings" />
+            <Button to="/about" text="Settings" />
           </>
         )}
       </RouterContextProvider>
     ));
 
     const [settings] = container.querySelectorAll("a");
-    expect(settings).toHaveAttribute("href", "/settings");
+    expect(settings).toHaveAttribute("href", "/about");
     expect(settings).not.toHaveAttribute("target");
     expect(settings).toHaveAttribute("data-ui-element", "button");
   });
@@ -266,8 +266,8 @@ describe("Button component", () => {
       <RouterContextProvider router={router}>
         {() => (
           <Button
-            to="/settings"
-            search={{ highlight: "theme" }}
+            to="/about"
+            search={{ highlight: "theme" } as never}
             text="Settings"
           />
         )}
@@ -276,7 +276,7 @@ describe("Button component", () => {
 
     expect(container.querySelector("a")).toHaveAttribute(
       "href",
-      "/settings?highlight=theme",
+      "/about?highlight=theme",
     );
   });
 
@@ -303,7 +303,7 @@ describe("Button component", () => {
 
     const { container } = render(() => (
       <RouterContextProvider router={router}>
-        {() => <Button to="/settings" text="Settings" />}
+        {() => <Button to="/about" text="Settings" />}
       </RouterContextProvider>
     ));
     const link = container.querySelector("a") as HTMLAnchorElement;
@@ -321,7 +321,7 @@ describe("Button component", () => {
 
     link.click();
     await vi.waitFor(() => {
-      expect(router.state.location.pathname).toBe("/settings");
+      expect(router.state.location.pathname).toBe("/about");
     });
   });
 
@@ -346,7 +346,7 @@ function createTestRouter(path = "/"): AnyRouter {
   return createRouter({
     routeTree: root.addChildren([
       createRoute({ getParentRoute: () => root, path: "/" }),
-      createRoute({ getParentRoute: () => root, path: "/settings" }),
+      createRoute({ getParentRoute: () => root, path: "/about" }),
       createRoute({ getParentRoute: () => root, path: "/leaderboards" }),
       createRoute({ getParentRoute: () => root, path: "/profile" }),
       createRoute({

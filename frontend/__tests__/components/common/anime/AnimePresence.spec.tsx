@@ -197,9 +197,9 @@ describe("AnimePresence (exitBeforeEnter)", () => {
       onMount(() => log.push("content mounted"));
       return <span>content</span>;
     };
-    const SettingsPage = createNonRouterPage("settings", Content);
+    const AboutPage = createNonRouterPage("about", Content);
     const show = renderSwitcher("a", (key) =>
-      key === "b" ? <SettingsPage /> : key,
+      key === "b" ? <AboutPage /> : key,
     );
     await settle();
     log.length = 0;
